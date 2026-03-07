@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: #0f0e0c;
+  color: #e8dcc8;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f0e0c;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a2722;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3a3732;
+}
+
+.leaflet-container {
+  background: #0f0e0c !important;
+}
+
+.leaflet-tile-pane {
+  filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+}
+
+@keyframes flowEdge {
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+
+@keyframes shipmentMove {
+  0% { offset-distance: 0%; }
+  100% { offset-distance: 100%; }
+}
+
+.animate-flow {
+  animation: flowEdge 1s linear infinite;
+}
