@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: import.meta.env.VITE_API_URL || '/api',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 });
@@ -118,6 +118,38 @@ const mockSimulationResult = {
   reasoning: 'The Observer detected a 34% throughput drop at Nagpur Hub. The Reasoner correlated this with historical congestion patterns and identified that Pune route has been 12% faster during similar events. The Decider evaluated three options and recommends rerouting via Pune based on optimal net score (82) with minimal blast radius (3 shipments affected).',
 };
 
+const mockScenario = {
+  warehouses: [
+    { id: 1, name: 'Mumbai Hub', lat: 19.076, lng: 72.8777, status: 'active' },
+    { id: 2, name: 'Delhi Hub', lat: 28.7041, lng: 77.1025, status: 'active' },
+    { id: 7, name: 'Pune Hub', lat: 18.5204, lng: 73.8567, status: 'active' },
+    { id: 11, name: 'Nagpur Hub', lat: 21.1458, lng: 79.0882, status: 'congested' },
+  ],
+  routes: [
+    { id: 'RTE-1001', fromWarehouseId: 1, toWarehouseId: 2, distanceKm: 1410, typicalEtaMinutes: 420 },
+    { id: 'RTE-1006', fromWarehouseId: 1, toWarehouseId: 11, distanceKm: 830, typicalEtaMinutes: 260 },
+    { id: 'RTE-1007', fromWarehouseId: 11, toWarehouseId: 2, distanceKm: 1030, typicalEtaMinutes: 330 },
+  ],
+  carriers: [
+    { id: 1, name: 'BlueDart', reliability: 94, capacity: 380 },
+    { id: 2, name: 'Delhivery', reliability: 91, capacity: 320 },
+  ],
+  shipments: [
+    { id: 'SHP-4821', routeId: 'RTE-1006', carrierId: 1, progress: 45, risk: 78, status: 'AT RISK', slaMinutes: 480, etaMinutes: 150, notes: 'Congestion watch' },
+    { id: 'SHP-9901', routeId: 'RTE-1001', carrierId: 2, progress: 24, risk: 42, status: 'ON TRACK', slaMinutes: 540, etaMinutes: 260, notes: 'Scheduled movement' },
+  ],
+};
+
+const mockDisruptionResult = {
+  message: 'Late pickup generated for SHP-4821',
+  pipeline: {
+    observer: { observations: [{ type: 'risky_shipments', items: [{ id: 'SHP-4821' }] }] },
+    reasoner: { hypotheses: [{ type: 'hub_congestion', hub: 'Nagpur Hub' }] },
+    decider: { actions: [{ id: 'ACT-SHP-4821', description: 'Reroute SHP-4821 away from congestion' }] },
+    queuedApprovals: 1,
+  },
+};
+
 // ── API functions with mock fallback ───────────────────
 
 async function fetchWithFallback(endpoint, mockData) {
@@ -146,6 +178,15 @@ export const rejectApproval = (id) =>
 
 export const runSimulation = (params) =>
   api.post('/simulation/run', params).catch(() => ({ data: mockSimulationResult }));
+
+export const getSimulationScenario = () =>
+  fetchWithFallback('/simulation/scenario', mockScenario);
+
+export const saveSimulationScenario = (scenario) =>
+  api.post('/simulation/scenario', scenario).catch(() => ({ data: scenario }));
+
+export const generateDisruption = (payload) =>
+  api.post('/simulation/disruptions', payload).catch(() => ({ data: mockDisruptionResult }));
 
 export { mockSimulationResult };
 export default api;
