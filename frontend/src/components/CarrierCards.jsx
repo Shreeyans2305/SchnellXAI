@@ -18,7 +18,13 @@ export default function CarrierCards() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {carriers.map((c) => {
+        {carriers.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-12 text-center">
+            <Building2 className="w-8 h-8 text-muted/30 mb-2" />
+            <p className="text-xs text-muted">No carrier data available</p>
+            <p className="text-[10px] text-muted/60 mt-1">Carrier performance will appear after running a simulation</p>
+          </div>
+        ) : (carriers.map((c) => {
           const reliColor = c.reliability >= 90 ? 'text-green' : c.reliability >= 85 ? 'text-amber' : 'text-red';
           const trendData = c.trend.map((v, i) => ({ v, i }));
 
@@ -60,7 +66,7 @@ export default function CarrierCards() {
               </div>
             </div>
           );
-        })}
+        }))}
       </div>
     </div>
   );

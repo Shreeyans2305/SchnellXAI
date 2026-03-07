@@ -61,6 +61,16 @@ export default function ShipmentTable() {
               <tr>
                 <td colSpan={10} className="text-center py-8 text-muted">Loading shipments...</td>
               </tr>
+            ) : shipments.length === 0 ? (
+              <tr>
+                <td colSpan={10} className="text-center py-12">
+                  <div className="flex flex-col items-center gap-2">
+                    <Truck className="w-8 h-8 text-muted/30" />
+                    <p className="text-xs text-muted">No active shipments</p>
+                    <p className="text-[10px] text-muted/60">Go to Simulation → Generate Sample System to create test data</p>
+                  </div>
+                </td>
+              </tr>
             ) : (
               shipments.map((s) => {
                 const cfg = statusConfig[s.status] || statusConfig['ON TRACK'];

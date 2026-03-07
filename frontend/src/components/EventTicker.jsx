@@ -20,7 +20,13 @@ export default function EventTicker() {
     return () => clearInterval(id);
   }, []);
 
-  if (!events.length) return null;
+  if (!events.length) {
+    return (
+      <div className="w-full bg-surface border-b border-border overflow-hidden h-9 flex items-center shadow-sm px-6">
+        <span className="text-[10px] text-muted/50 font-mono">No agent activity yet — run a simulation to see live events here</span>
+      </div>
+    );
+  }
 
   const doubled = [...events, ...events];
 

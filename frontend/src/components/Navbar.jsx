@@ -18,10 +18,16 @@ export default function Navbar() {
         { label: 'Shipments', value: metrics.shipments.value, change: metrics.shipments.change, icon: Activity, gradient: 'card-gradient-blue' },
         { label: 'At Risk', value: metrics.atRisk.value, change: metrics.atRisk.change, icon: AlertTriangle, gradient: 'card-gradient-orange' },
         { label: 'Delayed', value: metrics.delayed.value, change: metrics.delayed.change, icon: Clock, gradient: 'card-gradient-red' },
-        { label: 'Agent Ops', value: metrics.agentOps.value.toLocaleString(), change: metrics.agentOps.change, icon: Cpu, gradient: 'card-gradient-purple' },
+        { label: 'Agent Ops', value: typeof metrics.agentOps.value === 'number' ? metrics.agentOps.value.toLocaleString() : '0', change: metrics.agentOps.change, icon: Cpu, gradient: 'card-gradient-purple' },
         { label: 'Approvals', value: metrics.approvals.value, change: metrics.approvals.change, icon: CheckCircle, gradient: 'card-gradient-green' },
       ]
-    : [];
+    : [
+        { label: 'Shipments', value: 0, change: '—', icon: Activity, gradient: 'card-gradient-blue' },
+        { label: 'At Risk', value: 0, change: '—', icon: AlertTriangle, gradient: 'card-gradient-orange' },
+        { label: 'Delayed', value: 0, change: '—', icon: Clock, gradient: 'card-gradient-red' },
+        { label: 'Agent Ops', value: 0, change: '—', icon: Cpu, gradient: 'card-gradient-purple' },
+        { label: 'Approvals', value: 0, change: '—', icon: CheckCircle, gradient: 'card-gradient-green' },
+      ];
 
   return (
     <nav className="w-full px-6 py-4">

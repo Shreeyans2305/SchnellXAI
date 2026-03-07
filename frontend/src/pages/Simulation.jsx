@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMapEvents } from 'react-leaflet';
-import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw, ChevronRight, CheckCircle2 } from 'lucide-react';
-import { generateDisruption, saveSimulationScenario } from '../services/api';
+import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw, ChevronRight, CheckCircle2, Wand2 } from 'lucide-react';
+import { generateDisruption, saveSimulationScenario, generateSampleSystem, resetState } from '../services/api';
 
 function MapClickCapture({ onClick }) {
   useMapEvents({
@@ -22,6 +22,7 @@ export default function Simulation() {
   const [carrierDraft, setCarrierDraft] = useState({ name: '', reliability: 90, capacity: 250 });
   const [shipmentDraft, setShipmentDraft] = useState({ routeId: '', carrierId: '', progress: 10, risk: 20, status: 'ON TRACK', slaMinutes: 420, etaMinutes: 220, notes: '' });
   const [disruptionDraft, setDisruptionDraft] = useState({ type: 'late_pickup', targetShipmentId: '', targetWarehouseId: '', severity: 60 });
+  const [generating, setGenerating] = useState(false);
 
   const warehousesById = useMemo(() => {
     const map = new Map();
@@ -162,11 +163,36 @@ export default function Simulation() {
     setDisruptionDraft({ type: 'late_pickup', targetShipmentId: '', targetWarehouseId: '', severity: 60 });
 
     try {
-      await saveSimulationScenario(emptyScenario);
+      await resetState();
       setScenarioSaved(true);
       setLastMessage('All simulation data reset and saved. Start by adding warehouses.');
     } catch {
       setLastMessage('Local reset completed, but backend save failed.');
+    }
+  };
+
+  const handleGenerateSample = async () => {
+    setGenerating(true);
+    try {
+      const res = await generateSampleSystem();
+      if (res.data) {
+        setScenario(res.data);
+        setScenarioSaved(true);
+        setLastMessage('Sample logistics system generated! You can now generate disruptions to test the AI agents.');
+        // Pre-fill disruption targets
+        if (res.data.shipments?.length) {
+          setDisruptionDraft((prev) => ({ ...prev, targetShipmentId: res.data.shipments[0].id }));
+        }
+        if (res.data.warehouses?.length) {
+          setDisruptionDraft((prev) => ({ ...prev, targetWarehouseId: res.data.warehouses[0].id }));
+        }
+      } else {
+        setLastMessage('Failed to generate sample system.');
+      }
+    } catch {
+      setLastMessage('Failed to generate sample system.');
+    } finally {
+      setGenerating(false);
     }
   };
 
@@ -267,11 +293,19 @@ export default function Simulation() {
             {saving ? 'Saving...' : 'Save Scenario'}
           </button>
           <button
+            onClick={handleGenerateSample}
+            disabled={generating}
+            className="px-3 py-2 text-xs rounded-xl bg-gradient-to-r from-purple to-blue text-white font-semibold flex items-center gap-1 disabled:opacity-60 hover:opacity-90 transition-opacity shadow-md"
+          >
+            <Wand2 className="w-3 h-3" />
+            {generating ? 'Generating...' : 'Generate Sample System'}
+          </button>
+          <button
             onClick={resetAllSimulationData}
             className="px-3 py-2 text-xs rounded-xl bg-bg border border-border text-text font-semibold flex items-center gap-1 hover:bg-border/30"
           >
             <RotateCcw className="w-3 h-3" />
-            Reset All Simulation Data
+            Reset All
           </button>
           <span className={`text-[10px] ${scenarioSaved ? 'text-green' : 'text-muted'}`}>
             {scenarioSaved ? 'Scenario saved' : 'Unsaved scenario'}

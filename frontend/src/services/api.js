@@ -185,8 +185,14 @@ export const getSimulationScenario = () =>
 export const saveSimulationScenario = (scenario) =>
   api.post('/simulation/scenario', scenario).catch(() => ({ data: scenario }));
 
+export const generateSampleSystem = () =>
+  api.post('/simulation/generate-sample', {}).catch(() => ({ data: null }));
+
+export const resetState = () =>
+  api.post('/simulation/reset', {}).catch(() => ({ data: { message: 'Reset failed' } }));
+
 export const generateDisruption = (payload) =>
-  api.post('/simulation/disruptions', payload).catch(() => ({ data: mockDisruptionResult }));
+  api.post('/simulation/disruptions', payload, { timeout: 180000 }).catch(() => ({ data: mockDisruptionResult }));
 
 export { mockSimulationResult };
 export default api;
