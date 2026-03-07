@@ -1468,5 +1468,185 @@
     "description": "Reroute SHP-9023 away from congested hub or degraded carrier",
     "before_metric": 1,
     "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 5,
+    "after_metric": 5
+  },
+  {
+    "action_id": "ACT-SHP-7734",
+    "description": "Reroute SHP-7734 away from congested hub or degraded carrier",
+    "before_metric": 5,
+    "after_metric": 5
+  },
+  {
+    "action_id": "ACT-SHP-9023",
+    "description": "Reroute SHP-9023 away from congested hub or degraded carrier",
+    "before_metric": 5,
+    "after_metric": 4
+  },
+  {
+    "action_id": "ACT-SHP-1156",
+    "description": "Reroute SHP-1156 away from congested hub or degraded carrier",
+    "before_metric": 4,
+    "after_metric": 4
+  },
+  {
+    "action_id": "ACT-SHP-8312",
+    "description": "Reroute SHP-8312 away from congested hub or degraded carrier",
+    "before_metric": 4,
+    "after_metric": 4
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 4,
+    "after_metric": 4
+  },
+  {
+    "action_id": "ACT-SHP-7734",
+    "description": "Reroute SHP-7734 away from congested hub or degraded carrier",
+    "before_metric": 4,
+    "after_metric": 4
+  },
+  {
+    "action_id": "ACT-SHP-1156",
+    "description": "Reroute SHP-1156 away from congested hub or degraded carrier",
+    "before_metric": 4,
+    "after_metric": 3
+  },
+  {
+    "action_id": "ACT-SHP-8312",
+    "description": "Reroute SHP-8312 away from congested hub or degraded carrier",
+    "before_metric": 3,
+    "after_metric": 3
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 3,
+    "after_metric": 2
+  },
+  {
+    "action_id": "ACT-SHP-7734",
+    "description": "Reroute SHP-7734 away from congested hub or degraded carrier",
+    "before_metric": 2,
+    "after_metric": 1
+  },
+  {
+    "action_id": "ACT-SHP-8312",
+    "description": "Reroute SHP-8312 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-3192",
+    "description": "Reroute SHP-3192 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 2,
+    "after_metric": 1
+  },
+  {
+    "action_id": "ACT-SHP-3192",
+    "description": "Reroute SHP-3192 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-3192",
+    "description": "Reroute SHP-3192 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-3192",
+    "description": "Reroute SHP-3192 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-7734",
+    "description": "Reroute SHP-7734 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-9023",
+    "description": "Reroute SHP-9023 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-3192",
+    "description": "Reroute SHP-3192 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-7734",
+    "description": "Reroute SHP-7734 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-5567",
+    "description": "Reroute SHP-5567 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-3192",
+    "description": "Reroute SHP-3192 away from congested hub or degraded carrier",
+    "before_metric": 2,
+    "after_metric": 1
+  },
+  {
+    "action_id": "ACT-SHP-7734",
+    "description": "Reroute SHP-7734 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4821",
+    "description": "Reroute SHP-4821 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4260",
+    "description": "Reroute SHP-4260 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
+  },
+  {
+    "action_id": "ACT-SHP-4260",
+    "description": "Reroute SHP-4260 away from congested hub or degraded carrier",
+    "before_metric": 1,
+    "after_metric": 0
   }
 ]
