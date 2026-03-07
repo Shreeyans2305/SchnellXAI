@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMapEvents } from 'react-leaflet';
-import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw } from 'lucide-react';
+import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { generateDisruption, saveSimulationScenario } from '../services/api';
 
 function MapClickCapture({ onClick }) {
@@ -281,97 +281,441 @@ export default function Simulation() {
       </div>
 
       <div className="space-y-4">
+        {/* Flowchart with counters on top */}
         <div className="bg-surface border border-amber/10 rounded-xl p-4">
-          <h3 className="text-sm font-semibold text-text mb-2">Build Flow</h3>
-          <div className="grid grid-cols-2 gap-2 text-[11px] text-text/60">
-            <div className="border border-white/10 rounded-lg p-2">1) Add warehouses (minimum 2)</div>
-            <div className="border border-white/10 rounded-lg p-2">2) Add routes between warehouses</div>
-            <div className="border border-white/10 rounded-lg p-2">3) Add at least one carrier</div>
-            <div className="border border-white/10 rounded-lg p-2">4) Add shipments on routes</div>
-            <div className="border border-white/10 rounded-lg p-2">5) Save scenario</div>
-            <div className="border border-white/10 rounded-lg p-2">6) Generate disruptions</div>
+          <h3 className="text-sm font-semibold text-text mb-3">Scenario Build Progress</h3>
+          
+          {/* Counters */}
+          <div className="grid grid-cols-4 gap-2 text-[11px] mb-4">
+            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
+              <div className="text-text/40 text-[10px]">Warehouses</div>
+              <div className="text-amber font-bold text-base">{scenario.warehouses.length}</div>
+            </div>
+            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
+              <div className="text-text/40 text-[10px]">Routes</div>
+              <div className="text-amber font-bold text-base">{scenario.routes.length}</div>
+            </div>
+            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
+              <div className="text-text/40 text-[10px]">Carriers</div>
+              <div className="text-amber font-bold text-base">{scenario.carriers.length}</div>
+            </div>
+            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
+              <div className="text-text/40 text-[10px]">Shipments</div>
+              <div className="text-amber font-bold text-base">{scenario.shipments.length}</div>
+            </div>
           </div>
-          <div className="mt-3 grid grid-cols-4 gap-2 text-[11px]">
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1">Warehouses: <span className="text-amber">{scenario.warehouses.length}</span></div>
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1">Routes: <span className="text-amber">{scenario.routes.length}</span></div>
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1">Carriers: <span className="text-amber">{scenario.carriers.length}</span></div>
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1">Shipments: <span className="text-amber">{scenario.shipments.length}</span></div>
+
+          {/* Visual Flowchart */}
+          <div className="flex items-center justify-between text-[10px]">
+            <div className={`flex flex-col items-center gap-1 ${scenario.warehouses.length >= 2 ? 'text-green' : 'text-text/40'}`}>
+              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${scenario.warehouses.length >= 2 ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+                {scenario.warehouses.length >= 2 ? <CheckCircle2 className="w-5 h-5" /> : <Factory className="w-5 h-5" />}
+              </div>
+              <div className="font-semibold">Warehouses</div>
+              <div className="text-[9px]">Min: 2</div>
+            </div>
+            
+            <ChevronRight className="w-4 h-4 text-text/20" />
+            
+            <div className={`flex flex-col items-center gap-1 ${canCreateRoutes && scenario.routes.length >= 1 ? 'text-green' : 'text-text/40'}`}>
+              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${canCreateRoutes && scenario.routes.length >= 1 ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+                {canCreateRoutes && scenario.routes.length >= 1 ? <CheckCircle2 className="w-5 h-5" /> : <Route className="w-5 h-5" />}
+              </div>
+              <div className="font-semibold">Routes</div>
+              <div className="text-[9px]">Min: 1</div>
+            </div>
+            
+            <ChevronRight className="w-4 h-4 text-text/20" />
+            
+            <div className={`flex flex-col items-center gap-1 ${scenario.carriers.length >= 1 ? 'text-green' : 'text-text/40'}`}>
+              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${scenario.carriers.length >= 1 ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+                {scenario.carriers.length >= 1 ? <CheckCircle2 className="w-5 h-5" /> : <Truck className="w-5 h-5" />}
+              </div>
+              <div className="font-semibold">Carriers</div>
+              <div className="text-[9px]">Min: 1</div>
+            </div>
+            
+            <ChevronRight className="w-4 h-4 text-text/20" />
+            
+            <div className={`flex flex-col items-center gap-1 ${isScenarioComplete ? 'text-green' : 'text-text/40'}`}>
+              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${isScenarioComplete ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+                {isScenarioComplete ? <CheckCircle2 className="w-5 h-5" /> : <Network className="w-5 h-5" />}
+              </div>
+              <div className="font-semibold">Shipments</div>
+              <div className="text-[9px]">Min: 1</div>
+            </div>
+            
+            <ChevronRight className="w-4 h-4 text-text/20" />
+            
+            <div className={`flex flex-col items-center gap-1 ${scenarioSaved ? 'text-green' : 'text-text/40'}`}>
+              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${scenarioSaved ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+                {scenarioSaved ? <CheckCircle2 className="w-5 h-5" /> : <Save className="w-5 h-5" />}
+              </div>
+              <div className="font-semibold">Save</div>
+              <div className="text-[9px]">Required</div>
+            </div>
+            
+            <ChevronRight className="w-4 h-4 text-text/20" />
+            
+            <div className={`flex flex-col items-center gap-1 ${canRunDisruptions ? 'text-green' : 'text-text/40'}`}>
+              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${canRunDisruptions ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="font-semibold">Disrupt</div>
+              <div className="text-[9px]">Ready</div>
+            </div>
           </div>
         </div>
 
-        <div className="bg-surface border border-amber/10 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2"><Factory className="w-4 h-4 text-amber" /><h3 className="text-sm font-semibold">Step 1 & 2: Warehouses + Routes</h3></div>
-          <div className="text-[11px] text-text/50">Tip: click the map first to auto-fill latitude/longitude, then add warehouse. Routes unlock after at least 2 warehouses.</div>
-          <div className="grid grid-cols-2 gap-2">
-            <input value={warehouseDraft.name} onChange={(e) => setWarehouseDraft((p) => ({ ...p, name: e.target.value }))} placeholder="Warehouse name" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs" />
-            <button onClick={addWarehouse} className="bg-blue/20 border border-blue/30 rounded-lg text-xs px-2 py-1.5 flex items-center justify-center gap-1"><Plus className="w-3 h-3" />Add Warehouse</button>
-            <input value={warehouseDraft.lat} onChange={(e) => setWarehouseDraft((p) => ({ ...p, lat: e.target.value }))} placeholder="Latitude" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs" />
-            <input value={warehouseDraft.lng} onChange={(e) => setWarehouseDraft((p) => ({ ...p, lng: e.target.value }))} placeholder="Longitude" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs" />
+        {/* Step 1: Warehouses */}
+        <div className="bg-surface border border-amber/10 rounded-xl p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-blue/20 border border-blue/40 flex items-center justify-center text-xs font-bold text-blue">1</div>
+            <Factory className="w-4 h-4 text-blue" />
+            <h3 className="text-sm font-semibold text-text">Add Warehouses</h3>
+            <span className="ml-auto text-[10px] text-text/40">Minimum 2 required</span>
           </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <select disabled={!canCreateRoutes} value={routeDraft.fromWarehouseId} onChange={(e) => setRouteDraft((p) => ({ ...p, fromWarehouseId: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40">
-              <option value="">From warehouse</option>
-              {scenario.warehouses.map((w) => <option key={`from-${w.id}`} value={w.id}>{w.name}</option>)}
-            </select>
-            <select disabled={!canCreateRoutes} value={routeDraft.toWarehouseId} onChange={(e) => setRouteDraft((p) => ({ ...p, toWarehouseId: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40">
-              <option value="">To warehouse</option>
-              {scenario.warehouses.map((w) => <option key={`to-${w.id}`} value={w.id}>{w.name}</option>)}
-            </select>
-            <input disabled={!canCreateRoutes} type="number" value={routeDraft.distanceKm} onChange={(e) => setRouteDraft((p) => ({ ...p, distanceKm: e.target.value }))} placeholder="Distance (km)" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40" />
-            <input disabled={!canCreateRoutes} type="number" value={routeDraft.typicalEtaMinutes} onChange={(e) => setRouteDraft((p) => ({ ...p, typicalEtaMinutes: e.target.value }))} placeholder="ETA mins" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40" />
+          <div className="text-[11px] text-text/50 bg-bg/40 border border-white/10 rounded-lg p-2">
+            💡 <strong>Tip:</strong> Click anywhere on the map to auto-fill the latitude and longitude fields below.
           </div>
-          <button disabled={!canCreateRoutes} onClick={addRoute} className="w-full bg-amber/20 border border-amber/30 rounded-lg text-xs px-2 py-1.5 flex items-center justify-center gap-1 disabled:opacity-40"><Route className="w-3 h-3" />Add Route</button>
-        </div>
-
-        <div className="bg-surface border border-amber/10 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2"><Truck className="w-4 h-4 text-green" /><h3 className="text-sm font-semibold">Step 3 & 4: Carriers + Shipments</h3></div>
-          <div className="text-[11px] text-text/50">Shipments unlock only after at least 1 route and 1 carrier are added.</div>
-          <div className="grid grid-cols-3 gap-2">
-            <input value={carrierDraft.name} onChange={(e) => setCarrierDraft((p) => ({ ...p, name: e.target.value }))} placeholder="Carrier" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs" />
-            <input type="number" value={carrierDraft.reliability} onChange={(e) => setCarrierDraft((p) => ({ ...p, reliability: e.target.value }))} placeholder="Reliability" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs" />
-            <button onClick={addCarrier} className="bg-green/20 border border-green/30 rounded-lg text-xs px-2 py-1.5">Add Carrier</button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <select disabled={!canCreateShipments} value={shipmentDraft.routeId} onChange={(e) => setShipmentDraft((p) => ({ ...p, routeId: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40">
-              <option value="">Route</option>
-              {scenario.routes.map((r) => <option key={r.id} value={r.id}>{r.id}</option>)}
-            </select>
-            <select disabled={!canCreateShipments} value={shipmentDraft.carrierId} onChange={(e) => setShipmentDraft((p) => ({ ...p, carrierId: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40">
-              <option value="">Carrier</option>
-              {scenario.carriers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-            <input disabled={!canCreateShipments} type="number" value={shipmentDraft.progress} onChange={(e) => setShipmentDraft((p) => ({ ...p, progress: e.target.value }))} placeholder="Progress %" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40" />
-            <input disabled={!canCreateShipments} type="number" value={shipmentDraft.risk} onChange={(e) => setShipmentDraft((p) => ({ ...p, risk: e.target.value }))} placeholder="Risk" className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40" />
-            <select disabled={!canCreateShipments} value={shipmentDraft.status} onChange={(e) => setShipmentDraft((p) => ({ ...p, status: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs disabled:opacity-40">
-              <option value="ON TRACK">ON TRACK</option>
-              <option value="AT RISK">AT RISK</option>
-              <option value="DELAYED">DELAYED</option>
-            </select>
-            <button disabled={!canCreateShipments} onClick={addShipment} className="bg-purple/20 border border-purple/30 rounded-lg text-xs px-2 py-1.5 disabled:opacity-40">Add Shipment</button>
+          
+          <div className="space-y-2">
+            <div>
+              <label className="text-[10px] text-text/50 mb-1 block">Warehouse Name (e.g., "Mumbai Hub")</label>
+              <input 
+                value={warehouseDraft.name} 
+                onChange={(e) => setWarehouseDraft((p) => ({ ...p, name: e.target.value }))} 
+                placeholder="Enter warehouse name" 
+                className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Latitude (click map)</label>
+                <input 
+                  value={warehouseDraft.lat} 
+                  onChange={(e) => setWarehouseDraft((p) => ({ ...p, lat: e.target.value }))} 
+                  placeholder="e.g., 19.0760" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Longitude (click map)</label>
+                <input 
+                  value={warehouseDraft.lng} 
+                  onChange={(e) => setWarehouseDraft((p) => ({ ...p, lng: e.target.value }))} 
+                  placeholder="e.g., 72.8777" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                />
+              </div>
+            </div>
+            <button 
+              onClick={addWarehouse} 
+              className="w-full bg-blue/20 border border-blue/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 hover:bg-blue/30 font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              Add Warehouse to Map
+            </button>
           </div>
         </div>
 
-        <div className="bg-surface border border-amber/10 rounded-xl p-4 space-y-3">
-          <div className="flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-red" /><h3 className="text-sm font-semibold">Scenario Disruptions → Backend Pipeline</h3></div>
-          <div className="text-[11px] text-text/50">Disruptions unlock only after you add warehouses, routes, carriers, shipments and save the scenario.</div>
-          <div className="grid grid-cols-3 gap-2">
-            <select value={disruptionDraft.targetShipmentId} onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs">
-              <option value="">Auto shipment</option>
-              {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
-            </select>
-            <select value={disruptionDraft.targetWarehouseId} onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs">
-              <option value="">Auto warehouse</option>
-              {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-            </select>
-            <input type="number" value={disruptionDraft.severity} onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-xs" placeholder="Severity" />
+        {/* Step 2: Routes */}
+        <div className={`bg-surface border rounded-xl p-4 space-y-4 ${canCreateRoutes ? 'border-amber/10' : 'border-white/5 opacity-60'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canCreateRoutes ? 'bg-amber/20 border border-amber/40 text-amber' : 'bg-white/5 border border-white/10 text-text/30'}`}>2</div>
+            <Route className={`w-4 h-4 ${canCreateRoutes ? 'text-amber' : 'text-text/30'}`} />
+            <h3 className={`text-sm font-semibold ${canCreateRoutes ? 'text-text' : 'text-text/40'}`}>Add Routes Between Warehouses</h3>
+            <span className="ml-auto text-[10px] text-text/40">Minimum 1 required</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button disabled={!canRunDisruptions} onClick={() => triggerDisruption('late_pickup')} className="bg-red/20 border border-red/30 rounded-lg text-xs py-2 disabled:opacity-40">Late Pickup</button>
-            <button disabled={!canRunDisruptions} onClick={() => triggerDisruption('warehouse_congestion')} className="bg-red/20 border border-red/30 rounded-lg text-xs py-2 disabled:opacity-40">Warehouse Congestion</button>
-            <button disabled={!canRunDisruptions} onClick={() => triggerDisruption('inaccurate_eta')} className="bg-red/20 border border-red/30 rounded-lg text-xs py-2 disabled:opacity-40">Inaccurate ETA</button>
-            <button disabled={!canRunDisruptions} onClick={() => triggerDisruption('cascading_reroute')} className="bg-red/20 border border-red/30 rounded-lg text-xs py-2 disabled:opacity-40">Cascading Reroute</button>
+          {!canCreateRoutes && (
+            <div className="text-[11px] text-amber/70 bg-amber/10 border border-amber/20 rounded-lg p-2">
+              ⚠️ Add at least 2 warehouses first to unlock route creation.
+            </div>
+          )}
+          
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Starting Warehouse</label>
+                <select 
+                  disabled={!canCreateRoutes} 
+                  value={routeDraft.fromWarehouseId} 
+                  onChange={(e) => setRouteDraft((p) => ({ ...p, fromWarehouseId: e.target.value }))} 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                >
+                  <option value="">Select origin</option>
+                  {scenario.warehouses.map((w) => <option key={`from-${w.id}`} value={w.id}>{w.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Destination Warehouse</label>
+                <select 
+                  disabled={!canCreateRoutes} 
+                  value={routeDraft.toWarehouseId} 
+                  onChange={(e) => setRouteDraft((p) => ({ ...p, toWarehouseId: e.target.value }))} 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                >
+                  <option value="">Select destination</option>
+                  {scenario.warehouses.map((w) => <option key={`to-${w.id}`} value={w.id}>{w.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Distance (kilometers)</label>
+                <input 
+                  disabled={!canCreateRoutes} 
+                  type="number" 
+                  value={routeDraft.distanceKm} 
+                  onChange={(e) => setRouteDraft((p) => ({ ...p, distanceKm: e.target.value }))} 
+                  placeholder="e.g., 1410" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Typical ETA (minutes)</label>
+                <input 
+                  disabled={!canCreateRoutes} 
+                  type="number" 
+                  value={routeDraft.typicalEtaMinutes} 
+                  onChange={(e) => setRouteDraft((p) => ({ ...p, typicalEtaMinutes: e.target.value }))} 
+                  placeholder="e.g., 420" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                />
+              </div>
+            </div>
+            <button 
+              disabled={!canCreateRoutes} 
+              onClick={addRoute} 
+              className="w-full bg-amber/20 border border-amber/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-amber/30 font-semibold"
+            >
+              <Route className="w-4 h-4" />
+              Add Route Connection
+            </button>
+          </div>
+        </div>
+
+        {/* Step 3: Carriers */}
+        <div className="bg-surface border border-green/10 rounded-xl p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-green/20 border border-green/40 flex items-center justify-center text-xs font-bold text-green">3</div>
+            <Truck className="w-4 h-4 text-green" />
+            <h3 className="text-sm font-semibold text-text">Add Carriers</h3>
+            <span className="ml-auto text-[10px] text-text/40">Minimum 1 required</span>
+          </div>
+          
+          <div className="space-y-2">
+            <div>
+              <label className="text-[10px] text-text/50 mb-1 block">Carrier Name (e.g., "BlueDart", "Delhivery")</label>
+              <input 
+                value={carrierDraft.name} 
+                onChange={(e) => setCarrierDraft((p) => ({ ...p, name: e.target.value }))} 
+                placeholder="Enter carrier name" 
+                className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Reliability Score (0-100)</label>
+                <input 
+                  type="number" 
+                  value={carrierDraft.reliability} 
+                  onChange={(e) => setCarrierDraft((p) => ({ ...p, reliability: e.target.value }))} 
+                  placeholder="e.g., 90" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Capacity (vehicles)</label>
+                <input 
+                  type="number" 
+                  value={carrierDraft.capacity} 
+                  onChange={(e) => setCarrierDraft((p) => ({ ...p, capacity: e.target.value }))} 
+                  placeholder="e.g., 250" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                />
+              </div>
+            </div>
+            <button 
+              onClick={addCarrier} 
+              className="w-full bg-green/20 border border-green/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 hover:bg-green/30 font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              Add Carrier to Fleet
+            </button>
+          </div>
+        </div>
+
+        {/* Step 4: Shipments */}
+        <div className={`bg-surface border rounded-xl p-4 space-y-4 ${canCreateShipments ? 'border-purple/10' : 'border-white/5 opacity-60'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canCreateShipments ? 'bg-purple/20 border border-purple/40 text-purple' : 'bg-white/5 border border-white/10 text-text/30'}`}>4</div>
+            <Network className={`w-4 h-4 ${canCreateShipments ? 'text-purple' : 'text-text/30'}`} />
+            <h3 className={`text-sm font-semibold ${canCreateShipments ? 'text-text' : 'text-text/40'}`}>Add Shipments</h3>
+            <span className="ml-auto text-[10px] text-text/40">Minimum 1 required</span>
+          </div>
+          {!canCreateShipments && (
+            <div className="text-[11px] text-purple/70 bg-purple/10 border border-purple/20 rounded-lg p-2">
+              ⚠️ Add at least 1 route and 1 carrier first to unlock shipment creation.
+            </div>
+          )}
+          
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Route (Origin → Destination)</label>
+                <select 
+                  disabled={!canCreateShipments} 
+                  value={shipmentDraft.routeId} 
+                  onChange={(e) => setShipmentDraft((p) => ({ ...p, routeId: e.target.value }))} 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                >
+                  <option value="">Select route</option>
+                  {scenario.routes.map((r) => <option key={r.id} value={r.id}>{r.id}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Carrier Company</label>
+                <select 
+                  disabled={!canCreateShipments} 
+                  value={shipmentDraft.carrierId} 
+                  onChange={(e) => setShipmentDraft((p) => ({ ...p, carrierId: e.target.value }))} 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                >
+                  <option value="">Select carrier</option>
+                  {scenario.carriers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Progress %</label>
+                <input 
+                  disabled={!canCreateShipments} 
+                  type="number" 
+                  value={shipmentDraft.progress} 
+                  onChange={(e) => setShipmentDraft((p) => ({ ...p, progress: e.target.value }))} 
+                  placeholder="0-100" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Risk Score</label>
+                <input 
+                  disabled={!canCreateShipments} 
+                  type="number" 
+                  value={shipmentDraft.risk} 
+                  onChange={(e) => setShipmentDraft((p) => ({ ...p, risk: e.target.value }))} 
+                  placeholder="0-100" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Status</label>
+                <select 
+                  disabled={!canCreateShipments} 
+                  value={shipmentDraft.status} 
+                  onChange={(e) => setShipmentDraft((p) => ({ ...p, status: e.target.value }))} 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                >
+                  <option value="ON TRACK">ON TRACK</option>
+                  <option value="AT RISK">AT RISK</option>
+                  <option value="DELAYED">DELAYED</option>
+                </select>
+              </div>
+            </div>
+            <button 
+              disabled={!canCreateShipments} 
+              onClick={addShipment} 
+              className="w-full bg-purple/20 border border-purple/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-purple/30 font-semibold"
+            >
+              <Plus className="w-4 h-4" />
+              Add Shipment to Scenario
+            </button>
+          </div>
+        </div>
+
+        {/* Step 5 & 6: Disruptions */}
+        <div className="bg-surface border border-red/10 rounded-xl p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canRunDisruptions ? 'bg-red/20 border border-red/40 text-red' : 'bg-white/5 border border-white/10 text-text/30'}`}>5</div>
+            <AlertTriangle className={`w-4 h-4 ${canRunDisruptions ? 'text-red' : 'text-text/30'}`} />
+            <h3 className={`text-sm font-semibold ${canRunDisruptions ? 'text-text' : 'text-text/40'}`}>Generate Disruptions</h3>
+          </div>
+          {!canRunDisruptions && (
+            <div className="text-[11px] text-red/70 bg-red/10 border border-red/20 rounded-lg p-2">
+              ⚠️ Complete all steps above and save the scenario first to unlock disruption generation.
+            </div>
+          )}
+          
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Target Shipment (optional)</label>
+                <select 
+                  disabled={!canRunDisruptions}
+                  value={disruptionDraft.targetShipmentId} 
+                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                >
+                  <option value="">Auto-select highest risk</option>
+                  {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Target Warehouse (optional)</label>
+                <select 
+                  disabled={!canRunDisruptions}
+                  value={disruptionDraft.targetWarehouseId} 
+                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                >
+                  <option value="">Auto-select</option>
+                  {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-text/50 mb-1 block">Severity (1-100)</label>
+                <input 
+                  disabled={!canRunDisruptions}
+                  type="number" 
+                  value={disruptionDraft.severity} 
+                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} 
+                  placeholder="60" 
+                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('late_pickup')} 
+                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+              >
+                📦 Late Pickup
+              </button>
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('warehouse_congestion')} 
+                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+              >
+                🏭 Warehouse Congestion
+              </button>
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('inaccurate_eta')} 
+                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+              >
+                ⏱️ Inaccurate ETA
+              </button>
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('cascading_reroute')} 
+                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+              >
+                🔄 Cascading Reroute
+              </button>
+            </div>
           </div>
 
           {pipeline && (
