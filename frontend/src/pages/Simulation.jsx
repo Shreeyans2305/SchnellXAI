@@ -192,12 +192,12 @@ export default function Simulation() {
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 p-4 overflow-y-auto h-full">
-      <div className="bg-surface border border-amber/10 rounded-xl overflow-hidden">
-        <div className="flex items-center gap-2 p-3 border-b border-amber/10">
+    <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 px-6 pb-6 overflow-y-auto h-full">
+      <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
+        <div className="flex items-center gap-2 p-4 border-b border-border">
           <Network className="w-4 h-4 text-amber" />
           <h3 className="text-sm font-semibold text-text">Simulation Network Builder</h3>
-          <span className="ml-auto text-[10px] text-text/40">Start empty. Click map to set warehouse coordinates</span>
+          <span className="ml-auto text-[10px] text-muted">Start empty. Click map to set warehouse coordinates</span>
         </div>
         <div className="h-[480px]">
           <MapContainer center={[22.5, 79]} zoom={5} style={{ height: '100%', width: '100%' }} zoomControl={false}>
@@ -224,7 +224,7 @@ export default function Simulation() {
                 key={hub.id}
                 center={[hub.lat, hub.lng]}
                 radius={hub.status === 'congested' ? 10 : 7}
-                pathOptions={{ color: hub.status === 'congested' ? '#f87171' : '#f5a623', fillOpacity: 0.35 }}
+                pathOptions={{ color: hub.status === 'congested' ? '#b32826' : '#f5a623', fillOpacity: 0.35 }}
               >
                 <Popup>
                   <div className="text-xs">
@@ -241,7 +241,7 @@ export default function Simulation() {
                 center={[s.lat, s.lng]}
                 radius={5}
                 pathOptions={{
-                  color: s.status === 'DELAYED' ? '#f87171' : s.status === 'AT RISK' ? '#f5a623' : '#4ade80',
+                  color: s.status === 'DELAYED' ? '#b32826' : s.status === 'AT RISK' ? '#f5a623' : '#42d65c',
                   fillOpacity: 0.9,
                   weight: 2,
                 }}
@@ -257,108 +257,108 @@ export default function Simulation() {
           </MapContainer>
         </div>
 
-        <div className="p-3 border-t border-amber/10 flex items-center gap-2">
+        <div className="p-4 border-t border-border flex items-center gap-2">
           <button
             onClick={handleSave}
             disabled={saving || !isScenarioComplete}
-            className="px-3 py-2 text-xs rounded-lg bg-amber text-bg font-semibold flex items-center gap-1 disabled:opacity-60"
+            className="px-3 py-2 text-xs rounded-xl bg-amber text-white font-semibold flex items-center gap-1 disabled:opacity-60"
           >
             <Save className="w-3 h-3" />
             {saving ? 'Saving...' : 'Save Scenario'}
           </button>
           <button
             onClick={resetAllSimulationData}
-            className="px-3 py-2 text-xs rounded-lg bg-white/5 border border-white/15 text-text font-semibold flex items-center gap-1 hover:bg-white/10"
+            className="px-3 py-2 text-xs rounded-xl bg-bg border border-border text-text font-semibold flex items-center gap-1 hover:bg-border/30"
           >
             <RotateCcw className="w-3 h-3" />
             Reset All Simulation Data
           </button>
-          <span className={`text-[10px] ${scenarioSaved ? 'text-green' : 'text-text/40'}`}>
+          <span className={`text-[10px] ${scenarioSaved ? 'text-green' : 'text-muted'}`}>
             {scenarioSaved ? 'Scenario saved' : 'Unsaved scenario'}
           </span>
-          <span className="text-xs text-text/50">{lastMessage}</span>
+          <span className="text-xs text-muted">{lastMessage}</span>
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {/* Flowchart with counters on top */}
-        <div className="bg-surface border border-amber/10 rounded-xl p-4">
+        <div className="bg-surface border border-border rounded-2xl p-5 shadow-card">
           <h3 className="text-sm font-semibold text-text mb-3">Scenario Build Progress</h3>
           
           {/* Counters */}
           <div className="grid grid-cols-4 gap-2 text-[11px] mb-4">
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
-              <div className="text-text/40 text-[10px]">Warehouses</div>
+            <div className="bg-bg border border-border rounded-xl px-2 py-1.5 text-center">
+              <div className="text-muted text-[10px]">Warehouses</div>
               <div className="text-amber font-bold text-base">{scenario.warehouses.length}</div>
             </div>
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
-              <div className="text-text/40 text-[10px]">Routes</div>
+            <div className="bg-bg border border-border rounded-xl px-2 py-1.5 text-center">
+              <div className="text-muted text-[10px]">Routes</div>
               <div className="text-amber font-bold text-base">{scenario.routes.length}</div>
             </div>
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
-              <div className="text-text/40 text-[10px]">Carriers</div>
+            <div className="bg-bg border border-border rounded-xl px-2 py-1.5 text-center">
+              <div className="text-muted text-[10px]">Carriers</div>
               <div className="text-amber font-bold text-base">{scenario.carriers.length}</div>
             </div>
-            <div className="bg-bg/40 border border-white/10 rounded-lg px-2 py-1.5 text-center">
-              <div className="text-text/40 text-[10px]">Shipments</div>
+            <div className="bg-bg border border-border rounded-xl px-2 py-1.5 text-center">
+              <div className="text-muted text-[10px]">Shipments</div>
               <div className="text-amber font-bold text-base">{scenario.shipments.length}</div>
             </div>
           </div>
 
           {/* Visual Flowchart */}
           <div className="flex items-center justify-between text-[10px]">
-            <div className={`flex flex-col items-center gap-1 ${scenario.warehouses.length >= 2 ? 'text-green' : 'text-text/40'}`}>
-              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${scenario.warehouses.length >= 2 ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+            <div className={`flex flex-col items-center gap-1 ${scenario.warehouses.length >= 2 ? 'text-green' : 'text-muted'}`}>
+              <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${scenario.warehouses.length >= 2 ? 'border-green bg-green/10' : 'border-border bg-bg'}`}>
                 {scenario.warehouses.length >= 2 ? <CheckCircle2 className="w-5 h-5" /> : <Factory className="w-5 h-5" />}
               </div>
               <div className="font-semibold">Warehouses</div>
               <div className="text-[9px]">Min: 2</div>
             </div>
             
-            <ChevronRight className="w-4 h-4 text-text/20" />
+            <ChevronRight className="w-4 h-4 text-border" />
             
-            <div className={`flex flex-col items-center gap-1 ${canCreateRoutes && scenario.routes.length >= 1 ? 'text-green' : 'text-text/40'}`}>
-              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${canCreateRoutes && scenario.routes.length >= 1 ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+            <div className={`flex flex-col items-center gap-1 ${canCreateRoutes && scenario.routes.length >= 1 ? 'text-green' : 'text-muted'}`}>
+              <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${canCreateRoutes && scenario.routes.length >= 1 ? 'border-green bg-green/10' : 'border-border bg-bg'}`}>
                 {canCreateRoutes && scenario.routes.length >= 1 ? <CheckCircle2 className="w-5 h-5" /> : <Route className="w-5 h-5" />}
               </div>
               <div className="font-semibold">Routes</div>
               <div className="text-[9px]">Min: 1</div>
             </div>
             
-            <ChevronRight className="w-4 h-4 text-text/20" />
+            <ChevronRight className="w-4 h-4 text-border" />
             
-            <div className={`flex flex-col items-center gap-1 ${scenario.carriers.length >= 1 ? 'text-green' : 'text-text/40'}`}>
-              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${scenario.carriers.length >= 1 ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+            <div className={`flex flex-col items-center gap-1 ${scenario.carriers.length >= 1 ? 'text-green' : 'text-muted'}`}>
+              <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${scenario.carriers.length >= 1 ? 'border-green bg-green/10' : 'border-border bg-bg'}`}>
                 {scenario.carriers.length >= 1 ? <CheckCircle2 className="w-5 h-5" /> : <Truck className="w-5 h-5" />}
               </div>
               <div className="font-semibold">Carriers</div>
               <div className="text-[9px]">Min: 1</div>
             </div>
             
-            <ChevronRight className="w-4 h-4 text-text/20" />
+            <ChevronRight className="w-4 h-4 text-border" />
             
-            <div className={`flex flex-col items-center gap-1 ${isScenarioComplete ? 'text-green' : 'text-text/40'}`}>
-              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${isScenarioComplete ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+            <div className={`flex flex-col items-center gap-1 ${isScenarioComplete ? 'text-green' : 'text-muted'}`}>
+              <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${isScenarioComplete ? 'border-green bg-green/10' : 'border-border bg-bg'}`}>
                 {isScenarioComplete ? <CheckCircle2 className="w-5 h-5" /> : <Network className="w-5 h-5" />}
               </div>
               <div className="font-semibold">Shipments</div>
               <div className="text-[9px]">Min: 1</div>
             </div>
             
-            <ChevronRight className="w-4 h-4 text-text/20" />
+            <ChevronRight className="w-4 h-4 text-border" />
             
-            <div className={`flex flex-col items-center gap-1 ${scenarioSaved ? 'text-green' : 'text-text/40'}`}>
-              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${scenarioSaved ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+            <div className={`flex flex-col items-center gap-1 ${scenarioSaved ? 'text-green' : 'text-muted'}`}>
+              <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${scenarioSaved ? 'border-green bg-green/10' : 'border-border bg-bg'}`}>
                 {scenarioSaved ? <CheckCircle2 className="w-5 h-5" /> : <Save className="w-5 h-5" />}
               </div>
               <div className="font-semibold">Save</div>
               <div className="text-[9px]">Required</div>
             </div>
             
-            <ChevronRight className="w-4 h-4 text-text/20" />
+            <ChevronRight className="w-4 h-4 text-border" />
             
-            <div className={`flex flex-col items-center gap-1 ${canRunDisruptions ? 'text-green' : 'text-text/40'}`}>
-              <div className={`w-12 h-12 rounded-lg border-2 flex items-center justify-center ${canRunDisruptions ? 'border-green bg-green/10' : 'border-white/20 bg-bg/40'}`}>
+            <div className={`flex flex-col items-center gap-1 ${canRunDisruptions ? 'text-green' : 'text-muted'}`}>
+              <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center ${canRunDisruptions ? 'border-green bg-green/10' : 'border-border bg-bg'}`}>
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="font-semibold">Disrupt</div>
@@ -368,50 +368,50 @@ export default function Simulation() {
         </div>
 
         {/* Step 1: Warehouses */}
-        <div className="bg-surface border border-amber/10 rounded-xl p-4 space-y-4">
+        <div className="bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-card">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-blue/20 border border-blue/40 flex items-center justify-center text-xs font-bold text-blue">1</div>
             <Factory className="w-4 h-4 text-blue" />
             <h3 className="text-sm font-semibold text-text">Add Warehouses</h3>
-            <span className="ml-auto text-[10px] text-text/40">Minimum 2 required</span>
+            <span className="ml-auto text-[10px] text-muted">Minimum 2 required</span>
           </div>
-          <div className="text-[11px] text-text/50 bg-bg/40 border border-white/10 rounded-lg p-2">
+          <div className="text-[11px] text-muted bg-bg border border-border rounded-xl p-2">
             💡 <strong>Tip:</strong> Click anywhere on the map to auto-fill the latitude and longitude fields below.
           </div>
           
           <div className="space-y-2">
             <div>
-              <label className="text-[10px] text-text/50 mb-1 block">Warehouse Name (e.g., "Mumbai Hub")</label>
+              <label className="text-[10px] text-muted mb-1 block">Warehouse Name (e.g., "Mumbai Hub")</label>
               <input 
                 value={warehouseDraft.name} 
                 onChange={(e) => setWarehouseDraft((p) => ({ ...p, name: e.target.value }))} 
                 placeholder="Enter warehouse name" 
-                className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs text-text"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Latitude (click map)</label>
+                <label className="text-[10px] text-muted mb-1 block">Latitude (click map)</label>
                 <input 
                   value={warehouseDraft.lat} 
                   onChange={(e) => setWarehouseDraft((p) => ({ ...p, lat: e.target.value }))} 
                   placeholder="e.g., 19.0760" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs text-text"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Longitude (click map)</label>
+                <label className="text-[10px] text-muted mb-1 block">Longitude (click map)</label>
                 <input 
                   value={warehouseDraft.lng} 
                   onChange={(e) => setWarehouseDraft((p) => ({ ...p, lng: e.target.value }))} 
                   placeholder="e.g., 72.8777" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs text-text"
                 />
               </div>
             </div>
             <button 
               onClick={addWarehouse} 
-              className="w-full bg-blue/20 border border-blue/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 hover:bg-blue/30 font-semibold"
+              className="w-full bg-blue/10 border border-blue/30 rounded-xl text-xs px-3 py-2.5 flex items-center justify-center gap-2 hover:bg-blue/20 font-semibold text-blue"
             >
               <Plus className="w-4 h-4" />
               Add Warehouse to Map
@@ -420,15 +420,15 @@ export default function Simulation() {
         </div>
 
         {/* Step 2: Routes */}
-        <div className={`bg-surface border rounded-xl p-4 space-y-4 ${canCreateRoutes ? 'border-amber/10' : 'border-white/5 opacity-60'}`}>
+        <div className={`bg-surface border rounded-2xl p-5 space-y-4 shadow-card ${canCreateRoutes ? 'border-border' : 'border-border opacity-60'}`}>
           <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canCreateRoutes ? 'bg-amber/20 border border-amber/40 text-amber' : 'bg-white/5 border border-white/10 text-text/30'}`}>2</div>
-            <Route className={`w-4 h-4 ${canCreateRoutes ? 'text-amber' : 'text-text/30'}`} />
-            <h3 className={`text-sm font-semibold ${canCreateRoutes ? 'text-text' : 'text-text/40'}`}>Add Routes Between Warehouses</h3>
-            <span className="ml-auto text-[10px] text-text/40">Minimum 1 required</span>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canCreateRoutes ? 'bg-amber/20 border border-amber/40 text-amber' : 'bg-bg border border-border text-muted'}`}>2</div>
+            <Route className={`w-4 h-4 ${canCreateRoutes ? 'text-amber' : 'text-muted'}`} />
+            <h3 className={`text-sm font-semibold ${canCreateRoutes ? 'text-text' : 'text-muted'}`}>Add Routes Between Warehouses</h3>
+            <span className="ml-auto text-[10px] text-muted">Minimum 1 required</span>
           </div>
           {!canCreateRoutes && (
-            <div className="text-[11px] text-amber/70 bg-amber/10 border border-amber/20 rounded-lg p-2">
+            <div className="text-[11px] text-amber bg-amber/5 border border-amber/20 rounded-xl p-2">
               ⚠️ Add at least 2 warehouses first to unlock route creation.
             </div>
           )}
@@ -436,24 +436,24 @@ export default function Simulation() {
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Starting Warehouse</label>
+                <label className="text-[10px] text-muted mb-1 block">Starting Warehouse</label>
                 <select 
                   disabled={!canCreateRoutes} 
                   value={routeDraft.fromWarehouseId} 
                   onChange={(e) => setRouteDraft((p) => ({ ...p, fromWarehouseId: e.target.value }))} 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="">Select origin</option>
                   {scenario.warehouses.map((w) => <option key={`from-${w.id}`} value={w.id}>{w.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Destination Warehouse</label>
+                <label className="text-[10px] text-muted mb-1 block">Destination Warehouse</label>
                 <select 
                   disabled={!canCreateRoutes} 
                   value={routeDraft.toWarehouseId} 
                   onChange={(e) => setRouteDraft((p) => ({ ...p, toWarehouseId: e.target.value }))} 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="">Select destination</option>
                   {scenario.warehouses.map((w) => <option key={`to-${w.id}`} value={w.id}>{w.name}</option>)}
@@ -462,32 +462,32 @@ export default function Simulation() {
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Distance (kilometers)</label>
+                <label className="text-[10px] text-muted mb-1 block">Distance (kilometers)</label>
                 <input 
                   disabled={!canCreateRoutes} 
                   type="number" 
                   value={routeDraft.distanceKm} 
                   onChange={(e) => setRouteDraft((p) => ({ ...p, distanceKm: e.target.value }))} 
                   placeholder="e.g., 1410" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Typical ETA (minutes)</label>
+                <label className="text-[10px] text-muted mb-1 block">Typical ETA (minutes)</label>
                 <input 
                   disabled={!canCreateRoutes} 
                   type="number" 
                   value={routeDraft.typicalEtaMinutes} 
                   onChange={(e) => setRouteDraft((p) => ({ ...p, typicalEtaMinutes: e.target.value }))} 
                   placeholder="e.g., 420" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 />
               </div>
             </div>
             <button 
               disabled={!canCreateRoutes} 
               onClick={addRoute} 
-              className="w-full bg-amber/20 border border-amber/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-amber/30 font-semibold"
+              className="w-full bg-amber/10 border border-amber/30 rounded-xl text-xs px-3 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-amber/20 font-semibold text-amber"
             >
               <Route className="w-4 h-4" />
               Add Route Connection
@@ -496,49 +496,49 @@ export default function Simulation() {
         </div>
 
         {/* Step 3: Carriers */}
-        <div className="bg-surface border border-green/10 rounded-xl p-4 space-y-4">
+        <div className="bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-card">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-green/20 border border-green/40 flex items-center justify-center text-xs font-bold text-green">3</div>
             <Truck className="w-4 h-4 text-green" />
             <h3 className="text-sm font-semibold text-text">Add Carriers</h3>
-            <span className="ml-auto text-[10px] text-text/40">Minimum 1 required</span>
+            <span className="ml-auto text-[10px] text-muted">Minimum 1 required</span>
           </div>
           
           <div className="space-y-2">
             <div>
-              <label className="text-[10px] text-text/50 mb-1 block">Carrier Name (e.g., "BlueDart", "Delhivery")</label>
+              <label className="text-[10px] text-muted mb-1 block">Carrier Name (e.g., "BlueDart", "Delhivery")</label>
               <input 
                 value={carrierDraft.name} 
                 onChange={(e) => setCarrierDraft((p) => ({ ...p, name: e.target.value }))} 
                 placeholder="Enter carrier name" 
-                className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs text-text"
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Reliability Score (0-100)</label>
+                <label className="text-[10px] text-muted mb-1 block">Reliability Score (0-100)</label>
                 <input 
                   type="number" 
                   value={carrierDraft.reliability} 
                   onChange={(e) => setCarrierDraft((p) => ({ ...p, reliability: e.target.value }))} 
                   placeholder="e.g., 90" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs text-text"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Capacity (vehicles)</label>
+                <label className="text-[10px] text-muted mb-1 block">Capacity (vehicles)</label>
                 <input 
                   type="number" 
                   value={carrierDraft.capacity} 
                   onChange={(e) => setCarrierDraft((p) => ({ ...p, capacity: e.target.value }))} 
                   placeholder="e.g., 250" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs text-text"
                 />
               </div>
             </div>
             <button 
               onClick={addCarrier} 
-              className="w-full bg-green/20 border border-green/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 hover:bg-green/30 font-semibold"
+              className="w-full bg-green/10 border border-green/30 rounded-xl text-xs px-3 py-2.5 flex items-center justify-center gap-2 hover:bg-green/20 font-semibold text-green"
             >
               <Plus className="w-4 h-4" />
               Add Carrier to Fleet
@@ -547,15 +547,15 @@ export default function Simulation() {
         </div>
 
         {/* Step 4: Shipments */}
-        <div className={`bg-surface border rounded-xl p-4 space-y-4 ${canCreateShipments ? 'border-purple/10' : 'border-white/5 opacity-60'}`}>
+        <div className={`bg-surface border rounded-2xl p-5 space-y-4 shadow-card ${canCreateShipments ? 'border-border' : 'border-border opacity-60'}`}>
           <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canCreateShipments ? 'bg-purple/20 border border-purple/40 text-purple' : 'bg-white/5 border border-white/10 text-text/30'}`}>4</div>
-            <Network className={`w-4 h-4 ${canCreateShipments ? 'text-purple' : 'text-text/30'}`} />
-            <h3 className={`text-sm font-semibold ${canCreateShipments ? 'text-text' : 'text-text/40'}`}>Add Shipments</h3>
-            <span className="ml-auto text-[10px] text-text/40">Minimum 1 required</span>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canCreateShipments ? 'bg-purple/20 border border-purple/40 text-purple' : 'bg-bg border border-border text-muted'}`}>4</div>
+            <Network className={`w-4 h-4 ${canCreateShipments ? 'text-purple' : 'text-muted'}`} />
+            <h3 className={`text-sm font-semibold ${canCreateShipments ? 'text-text' : 'text-muted'}`}>Add Shipments</h3>
+            <span className="ml-auto text-[10px] text-muted">Minimum 1 required</span>
           </div>
           {!canCreateShipments && (
-            <div className="text-[11px] text-purple/70 bg-purple/10 border border-purple/20 rounded-lg p-2">
+            <div className="text-[11px] text-purple bg-purple/5 border border-purple/20 rounded-xl p-2">
               ⚠️ Add at least 1 route and 1 carrier first to unlock shipment creation.
             </div>
           )}
@@ -563,24 +563,24 @@ export default function Simulation() {
           <div className="space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Route (Origin → Destination)</label>
+                <label className="text-[10px] text-muted mb-1 block">Route (Origin → Destination)</label>
                 <select 
                   disabled={!canCreateShipments} 
                   value={shipmentDraft.routeId} 
                   onChange={(e) => setShipmentDraft((p) => ({ ...p, routeId: e.target.value }))} 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="">Select route</option>
                   {scenario.routes.map((r) => <option key={r.id} value={r.id}>{r.id}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Carrier Company</label>
+                <label className="text-[10px] text-muted mb-1 block">Carrier Company</label>
                 <select 
                   disabled={!canCreateShipments} 
                   value={shipmentDraft.carrierId} 
                   onChange={(e) => setShipmentDraft((p) => ({ ...p, carrierId: e.target.value }))} 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="">Select carrier</option>
                   {scenario.carriers.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -589,34 +589,34 @@ export default function Simulation() {
             </div>
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Progress %</label>
+                <label className="text-[10px] text-muted mb-1 block">Progress %</label>
                 <input 
                   disabled={!canCreateShipments} 
                   type="number" 
                   value={shipmentDraft.progress} 
                   onChange={(e) => setShipmentDraft((p) => ({ ...p, progress: e.target.value }))} 
                   placeholder="0-100" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Risk Score</label>
+                <label className="text-[10px] text-muted mb-1 block">Risk Score</label>
                 <input 
                   disabled={!canCreateShipments} 
                   type="number" 
                   value={shipmentDraft.risk} 
                   onChange={(e) => setShipmentDraft((p) => ({ ...p, risk: e.target.value }))} 
                   placeholder="0-100" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 />
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Status</label>
+                <label className="text-[10px] text-muted mb-1 block">Status</label>
                 <select 
                   disabled={!canCreateShipments} 
                   value={shipmentDraft.status} 
                   onChange={(e) => setShipmentDraft((p) => ({ ...p, status: e.target.value }))} 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="ON TRACK">ON TRACK</option>
                   <option value="AT RISK">AT RISK</option>
@@ -627,7 +627,7 @@ export default function Simulation() {
             <button 
               disabled={!canCreateShipments} 
               onClick={addShipment} 
-              className="w-full bg-purple/20 border border-purple/30 rounded-lg text-xs px-3 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-purple/30 font-semibold"
+              className="w-full bg-purple/10 border border-purple/30 rounded-xl text-xs px-3 py-2.5 flex items-center justify-center gap-2 disabled:opacity-40 hover:bg-purple/20 font-semibold text-purple"
             >
               <Plus className="w-4 h-4" />
               Add Shipment to Scenario
@@ -636,14 +636,14 @@ export default function Simulation() {
         </div>
 
         {/* Step 5 & 6: Disruptions */}
-        <div className="bg-surface border border-red/10 rounded-xl p-4 space-y-4">
+        <div className="bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-card">
           <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canRunDisruptions ? 'bg-red/20 border border-red/40 text-red' : 'bg-white/5 border border-white/10 text-text/30'}`}>5</div>
-            <AlertTriangle className={`w-4 h-4 ${canRunDisruptions ? 'text-red' : 'text-text/30'}`} />
-            <h3 className={`text-sm font-semibold ${canRunDisruptions ? 'text-text' : 'text-text/40'}`}>Generate Disruptions</h3>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canRunDisruptions ? 'bg-red/10 border border-red/40 text-red' : 'bg-bg border border-border text-muted'}`}>5</div>
+            <AlertTriangle className={`w-4 h-4 ${canRunDisruptions ? 'text-red' : 'text-muted'}`} />
+            <h3 className={`text-sm font-semibold ${canRunDisruptions ? 'text-text' : 'text-muted'}`}>Generate Disruptions</h3>
           </div>
           {!canRunDisruptions && (
-            <div className="text-[11px] text-red/70 bg-red/10 border border-red/20 rounded-lg p-2">
+            <div className="text-[11px] text-red bg-red/5 border border-red/20 rounded-xl p-2">
               ⚠️ Complete all steps above and save the scenario first to unlock disruption generation.
             </div>
           )}
@@ -651,38 +651,38 @@ export default function Simulation() {
           <div className="space-y-2">
             <div className="grid grid-cols-3 gap-2">
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Target Shipment (optional)</label>
+                <label className="text-[10px] text-muted mb-1 block">Target Shipment (optional)</label>
                 <select 
                   disabled={!canRunDisruptions}
                   value={disruptionDraft.targetShipmentId} 
                   onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="">Auto-select highest risk</option>
                   {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Target Warehouse (optional)</label>
+                <label className="text-[10px] text-muted mb-1 block">Target Warehouse (optional)</label>
                 <select 
                   disabled={!canRunDisruptions}
                   value={disruptionDraft.targetWarehouseId} 
                   onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="">Auto-select</option>
                   {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="text-[10px] text-text/50 mb-1 block">Severity (1-100)</label>
+                <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
                 <input 
                   disabled={!canRunDisruptions}
                   type="number" 
                   value={disruptionDraft.severity} 
                   onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} 
                   placeholder="60" 
-                  className="w-full bg-bg/40 border border-white/10 rounded-lg px-3 py-2 text-xs disabled:opacity-40"
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 />
               </div>
             </div>
@@ -690,28 +690,28 @@ export default function Simulation() {
               <button 
                 disabled={!canRunDisruptions} 
                 onClick={() => triggerDisruption('late_pickup')} 
-                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
               >
                 📦 Late Pickup
               </button>
               <button 
                 disabled={!canRunDisruptions} 
                 onClick={() => triggerDisruption('warehouse_congestion')} 
-                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
               >
                 🏭 Warehouse Congestion
               </button>
               <button 
                 disabled={!canRunDisruptions} 
                 onClick={() => triggerDisruption('inaccurate_eta')} 
-                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
               >
                 ⏱️ Inaccurate ETA
               </button>
               <button 
                 disabled={!canRunDisruptions} 
                 onClick={() => triggerDisruption('cascading_reroute')} 
-                className="bg-red/20 border border-red/30 rounded-lg text-xs py-2.5 disabled:opacity-40 hover:bg-red/30 font-semibold"
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
               >
                 🔄 Cascading Reroute
               </button>
@@ -719,7 +719,7 @@ export default function Simulation() {
           </div>
 
           {pipeline && (
-            <div className="border border-white/10 rounded-lg p-3 bg-bg/40 space-y-2">
+            <div className="border border-border rounded-xl p-3 bg-bg space-y-2">
               <div className="flex items-center gap-1 text-xs text-amber"><Sparkles className="w-3 h-3" />Pipeline executed immediately</div>
               <div className="text-[11px] text-text/70">Observer: {(pipeline.observer?.observations || []).length} observation groups</div>
               <div className="text-[11px] text-text/70">Reasoner: {(pipeline.reasoner?.hypotheses || []).length} hypotheses</div>

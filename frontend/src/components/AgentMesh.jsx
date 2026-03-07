@@ -27,19 +27,19 @@ export default function AgentMesh() {
 
   if (loading) {
     return (
-      <div className="bg-surface border border-amber/10 rounded-xl p-4 h-full flex items-center justify-center">
+      <div className="bg-surface border border-border rounded-2xl p-5 h-full flex items-center justify-center shadow-card">
         <Activity className="w-6 h-6 text-amber animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="bg-surface border border-amber/10 rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="bg-surface border border-border rounded-2xl p-5 shadow-card">
+      <div className="flex items-center gap-2 mb-4">
         <Activity className="w-4 h-4 text-amber" />
         <h3 className="text-sm font-semibold text-text">Agent Mesh Network</h3>
-        <span className="text-[10px] text-text/30 ml-auto font-mono">LIVE</span>
-        <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse" />
+        <span className="text-[10px] text-muted ml-auto font-mono bg-bg px-2 py-0.5 rounded-lg">LIVE</span>
+        <span className="w-2 h-2 rounded-full bg-green animate-pulse" />
       </div>
 
       <svg viewBox="0 0 400 380" className="w-full">
@@ -56,7 +56,7 @@ export default function AgentMesh() {
               y1={from.y}
               x2={to.x}
               y2={to.y}
-              stroke={isActive ? '#f5a623' : '#2a2722'}
+              stroke={isActive ? '#f5a623' : '#e5e7eb'}
               strokeWidth={isActive ? 2 : 1}
               strokeDasharray={isActive ? '6 3' : '4 4'}
               className={isActive ? 'animate-flow' : ''}
@@ -72,13 +72,13 @@ export default function AgentMesh() {
           return (
             <g key={agent.id}>
               {/* Glow */}
-              <circle cx={pos.x} cy={pos.y} r="28" fill={agent.color} opacity="0.08" />
-              <circle cx={pos.x} cy={pos.y} r="22" fill="#161512" stroke={agent.color} strokeWidth="1.5" />
+              <circle cx={pos.x} cy={pos.y} r="28" fill={agent.color} opacity="0.1" />
+              <circle cx={pos.x} cy={pos.y} r="22" fill="#ffffff" stroke={agent.color} strokeWidth="2" />
               {/* Label */}
               <text x={pos.x} y={pos.y - 2} textAnchor="middle" fill={agent.color} fontSize="9" fontWeight="600" fontFamily="Outfit">
                 {agent.name.toUpperCase()}
               </text>
-              <text x={pos.x} y={pos.y + 10} textAnchor="middle" fill="#e8dcc8" fontSize="7" opacity="0.4" fontFamily="JetBrains Mono">
+              <text x={pos.x} y={pos.y + 10} textAnchor="middle" fill="#6b7280" fontSize="7" fontFamily="JetBrains Mono">
                 {agent.load}% load
               </text>
             </g>
@@ -87,11 +87,11 @@ export default function AgentMesh() {
       </svg>
 
       {/* Agent status list */}
-      <div className="grid grid-cols-5 gap-1 mt-2">
+      <div className="grid grid-cols-5 gap-1 mt-3">
         {agents.map((a) => (
           <div key={a.id} className="text-center">
-            <div className="w-2 h-2 rounded-full mx-auto mb-0.5" style={{ backgroundColor: a.color }} />
-            <div className="text-[9px] text-text/40 font-mono truncate">{a.messagesProcessed}</div>
+            <div className="w-2.5 h-2.5 rounded-full mx-auto mb-1" style={{ backgroundColor: a.color }} />
+            <div className="text-[9px] text-muted font-mono truncate">{a.messagesProcessed}</div>
           </div>
         ))}
       </div>

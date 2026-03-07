@@ -11,22 +11,22 @@ export default function CarrierCards() {
   }, []);
 
   return (
-    <div className="bg-surface border border-amber/10 rounded-xl p-4">
+    <div className="bg-surface border border-border rounded-2xl p-5 shadow-card">
       <div className="flex items-center gap-2 mb-4">
         <Building2 className="w-4 h-4 text-amber" />
         <h3 className="text-sm font-semibold text-text">Carrier Performance</h3>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {carriers.map((c) => {
           const reliColor = c.reliability >= 90 ? 'text-green' : c.reliability >= 85 ? 'text-amber' : 'text-red';
           const trendData = c.trend.map((v, i) => ({ v, i }));
 
           return (
-            <div key={c.id} className="border border-white/5 rounded-lg p-3 bg-bg/40 hover:border-amber/20 transition-all">
-              <div className="flex items-center justify-between mb-2">
+            <div key={c.id} className="border border-border rounded-2xl p-4 bg-surface hover:shadow-card-hover transition-all">
+              <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber/10 flex items-center justify-center text-xs font-bold text-amber">
+                  <div className="w-9 h-9 rounded-xl bg-amber/10 flex items-center justify-center text-xs font-bold text-amber">
                     {c.logo}
                   </div>
                   <span className="text-sm font-medium text-text">{c.name}</span>
@@ -35,8 +35,8 @@ export default function CarrierCards() {
 
               <div className="flex items-end justify-between">
                 <div>
-                  <div className="text-[10px] text-text/30 uppercase tracking-wider">Reliability</div>
-                  <div className={`text-xl font-bold ${reliColor}`}>{c.reliability}%</div>
+                  <div className="text-[10px] text-muted uppercase tracking-wider">Reliability</div>
+                  <div className={`text-2xl font-bold ${reliColor}`}>{c.reliability}%</div>
                 </div>
                 <div className="w-16 h-8">
                   <ResponsiveContainer>
@@ -47,13 +47,13 @@ export default function CarrierCards() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 mt-2 pt-2 border-t border-white/5">
+              <div className="flex items-center gap-3 mt-3 pt-3 border-t border-border">
                 <div>
-                  <div className="text-[9px] text-text/30">Active</div>
-                  <div className="text-xs text-text/70 font-mono">{c.active}</div>
+                  <div className="text-[9px] text-muted">Active</div>
+                  <div className="text-xs text-text/80 font-mono">{c.active}</div>
                 </div>
                 <div>
-                  <div className="text-[9px] text-text/30">Delayed</div>
+                  <div className="text-[9px] text-muted">Delayed</div>
                   <div className="text-xs text-red font-mono">{c.delayed}</div>
                 </div>
                 <TrendingUp className="w-3 h-3 text-green ml-auto" />

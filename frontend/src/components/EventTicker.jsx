@@ -25,14 +25,14 @@ export default function EventTicker() {
   const doubled = [...events, ...events];
 
   return (
-    <div className="w-full bg-surface/80 border-b border-amber/10 overflow-hidden h-8 flex items-center">
+    <div className="w-full bg-surface border-b border-border overflow-hidden h-9 flex items-center shadow-sm">
       <div className="flex animate-ticker whitespace-nowrap">
         {doubled.map((e, i) => (
           <span key={i} className="inline-flex items-center gap-2 px-6 text-xs font-mono">
-            <span className="text-text/40">{e.time}</span>
-            <span className="text-amber/30">•</span>
+            <span className="text-muted">{e.time}</span>
+            <span className="text-border">•</span>
             <span className={`font-semibold ${typeColors[e.type] || 'text-text'}`}>{e.type}</span>
-            <span className="text-text/30">{e.flow}</span>
+            <span className="text-muted/50">{e.flow}</span>
             <span className="text-text/70">{e.message}</span>
           </span>
         ))}

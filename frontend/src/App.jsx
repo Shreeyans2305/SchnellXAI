@@ -19,17 +19,17 @@ function LoadingFallback() {
 
 export default function App() {
   return (
-    <div className="h-screen w-screen flex flex-col bg-bg text-text font-outfit overflow-hidden">
-      {/* Top Event Ticker */}
-      <EventTicker />
+    <div className="h-screen w-screen flex bg-bg text-text font-outfit overflow-hidden">
+      {/* Sidebar */}
+      <Sidebar />
 
-      {/* Navbar */}
-      <Navbar />
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Event Ticker */}
+        <EventTicker />
 
-      {/* Main Body */}
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar />
+        {/* Navbar */}
+        <Navbar />
 
         {/* Content */}
         <main className="flex-1 overflow-hidden">
@@ -41,10 +41,10 @@ export default function App() {
             </Routes>
           </Suspense>
         </main>
-      </div>
 
-      {/* Footer Status Bar */}
-      <Footer />
+        {/* Footer Status Bar */}
+        <Footer />
+      </div>
     </div>
   );
 }

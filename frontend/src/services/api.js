@@ -31,11 +31,11 @@ const mockMetrics = {
 };
 
 const mockAgents = [
-  { id: 'observer', name: 'Observer', status: 'active', load: 72, messagesProcessed: 3421, lastAction: 'Scanning Nagpur hub telemetry', color: '#60a5fa' },
-  { id: 'reasoner', name: 'Reasoner', status: 'active', load: 58, messagesProcessed: 2180, lastAction: 'Analyzing delay correlation patterns', color: '#c084fc' },
+  { id: 'observer', name: 'Observer', status: 'active', load: 72, messagesProcessed: 3421, lastAction: 'Scanning Nagpur hub telemetry', color: '#3b82f6' },
+  { id: 'reasoner', name: 'Reasoner', status: 'active', load: 58, messagesProcessed: 2180, lastAction: 'Analyzing delay correlation patterns', color: '#8b5cf6' },
   { id: 'decider', name: 'Decider', status: 'active', load: 45, messagesProcessed: 1842, lastAction: 'Evaluating reroute for SHP-4821', color: '#f5a623' },
-  { id: 'executor', name: 'Executor', status: 'active', load: 63, messagesProcessed: 1567, lastAction: 'Dispatching manifest to Delhivery', color: '#4ade80' },
-  { id: 'learner', name: 'Learner', status: 'active', load: 34, messagesProcessed: 980, lastAction: 'Updating route optimization model', color: '#f87171' },
+  { id: 'executor', name: 'Executor', status: 'active', load: 63, messagesProcessed: 1567, lastAction: 'Dispatching manifest to Delhivery', color: '#42d65c' },
+  { id: 'learner', name: 'Learner', status: 'active', load: 34, messagesProcessed: 980, lastAction: 'Updating route optimization model', color: '#b32826' },
 ];
 
 const mockEdges = [

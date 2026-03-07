@@ -4,7 +4,7 @@ import { getHubs, getShipmentLocations } from '../services/api';
 import { Map as MapIcon } from 'lucide-react';
 
 function AnimatedMarker({ position, status, id }) {
-  const color = status === 'DELAYED' ? '#f87171' : status === 'AT RISK' ? '#f5a623' : '#4ade80';
+  const color = status === 'DELAYED' ? '#b32826' : status === 'AT RISK' ? '#f5a623' : '#42d65c';
 
   return (
     <CircleMarker center={position} radius={5} pathOptions={{ color, fillColor: color, fillOpacity: 0.9, weight: 2 }}>
@@ -33,8 +33,8 @@ function MapContent({ hubs, shipments }) {
           center={[hub.lat, hub.lng]}
           radius={hub.status === 'congested' ? 10 : 7}
           pathOptions={{
-            color: hub.status === 'congested' ? '#f87171' : '#f5a623',
-            fillColor: hub.status === 'congested' ? '#f87171' : '#f5a623',
+            color: hub.status === 'congested' ? '#b32826' : '#f5a623',
+            fillColor: hub.status === 'congested' ? '#b32826' : '#f5a623',
             fillOpacity: 0.3,
             weight: 1.5,
           }}
@@ -55,7 +55,7 @@ function MapContent({ hubs, shipments }) {
           key={`route-${s.id}`}
           positions={[[s.from.lat, s.from.lng], [s.lat, s.lng], [s.to.lat, s.to.lng]]}
           pathOptions={{
-            color: s.status === 'DELAYED' ? '#f87171' : s.status === 'AT RISK' ? '#f5a623' : '#4ade80',
+            color: s.status === 'DELAYED' ? '#b32826' : s.status === 'AT RISK' ? '#f5a623' : '#42d65c',
             weight: 1.5,
             opacity: 0.4,
             dashArray: '8 6',
@@ -87,12 +87,12 @@ export default function ShipmentMap() {
   }, []);
 
   return (
-    <div className="bg-surface border border-amber/10 rounded-xl overflow-hidden">
-      <div className="flex items-center gap-2 p-3 border-b border-amber/10">
+    <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
+      <div className="flex items-center gap-2 p-4 border-b border-border">
         <MapIcon className="w-4 h-4 text-amber" />
         <h3 className="text-sm font-semibold text-text">Live Shipment Map</h3>
-        <span className="text-[10px] text-text/30 ml-auto font-mono">REAL-TIME</span>
-        <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse" />
+        <span className="text-[10px] text-muted ml-auto font-mono bg-bg px-2 py-0.5 rounded-lg">REAL-TIME</span>
+        <span className="w-2 h-2 rounded-full bg-green animate-pulse" />
       </div>
       <div className="h-[500px]">
         <MapContainer
@@ -106,7 +106,7 @@ export default function ShipmentMap() {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 p-2 border-t border-amber/10">
+      <div className="flex items-center gap-4 p-3 border-t border-border">
         {[
           { color: 'bg-green', label: 'On Track' },
           { color: 'bg-amber', label: 'At Risk' },
@@ -114,8 +114,8 @@ export default function ShipmentMap() {
           { color: 'bg-amber/50', label: 'Hub' },
         ].map((l) => (
           <div key={l.label} className="flex items-center gap-1.5">
-            <span className={`w-2 h-2 rounded-full ${l.color}`} />
-            <span className="text-[10px] text-text/40">{l.label}</span>
+            <span className={`w-2.5 h-2.5 rounded-full ${l.color}`} />
+            <span className="text-[10px] text-muted">{l.label}</span>
           </div>
         ))}
       </div>

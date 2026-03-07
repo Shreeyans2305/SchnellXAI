@@ -11,10 +11,10 @@ function RiskBar({ value }) {
   const color = value > 70 ? 'bg-red' : value > 40 ? 'bg-amber' : 'bg-green';
   return (
     <div className="flex items-center gap-2">
-      <div className="w-16 h-1.5 bg-white/5 rounded-full overflow-hidden">
+      <div className="w-16 h-1.5 bg-border/50 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${value}%` }} />
       </div>
-      <span className="text-[10px] text-text/40 font-mono w-6">{value}%</span>
+      <span className="text-[10px] text-muted font-mono w-6">{value}%</span>
     </div>
   );
 }
@@ -22,10 +22,10 @@ function RiskBar({ value }) {
 function ProgressBar({ value }) {
   return (
     <div className="flex items-center gap-2">
-      <div className="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
+      <div className="w-20 h-1.5 bg-border/50 rounded-full overflow-hidden">
         <div className="h-full rounded-full bg-blue" style={{ width: `${value}%` }} />
       </div>
-      <span className="text-[10px] text-text/40 font-mono w-6">{value}%</span>
+      <span className="text-[10px] text-muted font-mono w-6">{value}%</span>
     </div>
   );
 }
@@ -34,12 +34,12 @@ export default function ShipmentTable() {
   const { shipments, loading } = useShipments();
 
   return (
-    <div className="bg-surface border border-amber/10 rounded-xl p-4">
+    <div className="bg-surface border border-border rounded-2xl p-5 shadow-card">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Truck className="w-4 h-4 text-amber" />
           <h3 className="text-sm font-semibold text-text">Active Shipments</h3>
-          <span className="text-[10px] text-text/30 px-1.5 py-0.5 bg-white/5 rounded font-mono">
+          <span className="text-[10px] text-muted px-2 py-0.5 bg-bg rounded-lg font-mono">
             {shipments.length}
           </span>
         </div>
@@ -48,9 +48,9 @@ export default function ShipmentTable() {
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-white/5">
+            <tr className="border-b border-border">
               {['ID', 'Route', 'Carrier', 'Progress', 'ETA', 'SLA', 'Risk', 'Agent', 'Status', 'Notes'].map((h) => (
-                <th key={h} className="text-left text-[10px] text-text/30 uppercase tracking-wider py-2 px-2 font-medium">
+                <th key={h} className="text-left text-[10px] text-muted uppercase tracking-wider py-3 px-2 font-medium">
                   {h}
                 </th>
               ))}
@@ -59,30 +59,30 @@ export default function ShipmentTable() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={10} className="text-center py-8 text-text/30">Loading shipments...</td>
+                <td colSpan={10} className="text-center py-8 text-muted">Loading shipments...</td>
               </tr>
             ) : (
               shipments.map((s) => {
                 const cfg = statusConfig[s.status] || statusConfig['ON TRACK'];
                 return (
-                  <tr key={s.id} className="border-b border-white/3 hover:bg-white/[0.02] transition-colors">
-                    <td className="py-2.5 px-2 font-mono text-amber">{s.id}</td>
-                    <td className="py-2.5 px-2 text-text/70">{s.route}</td>
-                    <td className="py-2.5 px-2 text-text/60">{s.carrier}</td>
-                    <td className="py-2.5 px-2"><ProgressBar value={s.progress} /></td>
-                    <td className="py-2.5 px-2 font-mono text-text/60">{s.eta}</td>
-                    <td className="py-2.5 px-2">
-                      <span className="text-[10px] px-1.5 py-0.5 bg-white/5 rounded text-text/50">{s.sla}</span>
+                  <tr key={s.id} className="border-b border-border/50 hover:bg-bg/50 transition-colors">
+                    <td className="py-3 px-2 font-mono text-amber font-medium">{s.id}</td>
+                    <td className="py-3 px-2 text-text/80">{s.route}</td>
+                    <td className="py-3 px-2 text-muted">{s.carrier}</td>
+                    <td className="py-3 px-2"><ProgressBar value={s.progress} /></td>
+                    <td className="py-3 px-2 font-mono text-muted">{s.eta}</td>
+                    <td className="py-3 px-2">
+                      <span className="text-[10px] px-2 py-0.5 bg-bg rounded-lg text-muted">{s.sla}</span>
                     </td>
-                    <td className="py-2.5 px-2"><RiskBar value={s.risk} /></td>
-                    <td className="py-2.5 px-2 text-purple text-[10px] font-mono">{s.agent}</td>
-                    <td className="py-2.5 px-2">
+                    <td className="py-3 px-2"><RiskBar value={s.risk} /></td>
+                    <td className="py-3 px-2 text-purple text-[10px] font-mono font-medium">{s.agent}</td>
+                    <td className="py-3 px-2">
                       <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
                         <cfg.icon className="w-2.5 h-2.5" />
                         {s.status}
                       </span>
                     </td>
-                    <td className="py-2.5 px-2 text-text/40 max-w-[200px] truncate">{s.notes}</td>
+                    <td className="py-3 px-2 text-muted max-w-[200px] truncate">{s.notes}</td>
                   </tr>
                 );
               })
