@@ -39,14 +39,19 @@ def warehouse_congestion(state: dict, payload: dict) -> dict:
     congestion_pct = int(payload.get("congestionPercent", 80))
     hubs = state.get("hubs") or state.get("warehouses", [])
     hub_name = "Unknown Hub"
+    hub_short = ""
     for h in hubs:
         if str(h.get("id")) == str(hub_id):
             h["status"] = "congested"
             h["shipments"] = min(int(h.get("shipments", 120)) + random.randint(40, 120), 600)
             hub_name = h.get("name", hub_name)
-    # Raise risk on all shipments passing through system
+            hub_short = hub_name.replace(" Hub", "").strip().lower()
+    # Only raise risk on shipments whose route passes through the congested hub
     risk_bump = max(10, severity // 3)
     for s in state.get("shipments", []):
+        route_lower = s.get("route", "").lower()
+        if hub_short and hub_short not in route_lower:
+            continue  # shipment doesn't route through this hub — leave it alone
         s["risk"] = min(100, int(s.get("risk", 30)) + risk_bump)
         if s["risk"] >= 80:
             s["status"] = "DELAYED"

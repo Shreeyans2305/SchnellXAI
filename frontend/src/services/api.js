@@ -184,5 +184,17 @@ export const resetState = () =>
 export const generateDisruption = (payload) =>
   api.post('/simulation/disruptions', payload, { timeout: 180000 }).catch(() => ({ data: mockDisruptionResult }));
 
+export const getPipelineStatus = () =>
+  fetchWithFallback('/simulation/pipeline-status', {
+    running: false,
+    cycles_completed: 0,
+    interval_seconds: 25,
+    buffered_anomalies: 0,
+    last_cycle: null,
+  });
+
+export const getAnomalyBuffer = () =>
+  fetchWithFallback('/simulation/anomaly-buffer', { count: 0, anomalies: [] });
+
 export { mockSimulationResult };
 export default api;

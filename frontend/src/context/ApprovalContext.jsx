@@ -5,18 +5,25 @@ const ApprovalContext = createContext({
   pendingApproval: null,
   showModal: false,
   setShowModal: () => {},
-  refresh: () => {},
+  refresh: () => Promise.resolve(),
 });
 
 export function ApprovalProvider({ children }) {
   const [pendingApproval, setPendingApproval] = useState(null);
   const [showModal, setShowModal] = useState(false);
 
-  const refresh = useCallback(() => {
-    getApproval().then((data) => {
-      if (data && data.id) setPendingApproval(data);
-      else setPendingApproval(null);
-    });
+  const refresh = useCallback(async () => {
+    try {
+      const data = await getApproval();
+      if (data && data.id) {
+        setPendingApproval(data);
+      } else {
+        setPendingApproval(null);
+        setShowModal(false); // auto-close modal when no pending approval
+      }
+    } catch {
+      setPendingApproval(null);
+    }
   }, []);
 
   useEffect(() => {

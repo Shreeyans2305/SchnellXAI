@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMapEvents } from 'react-leaflet';
-import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw, ChevronRight, CheckCircle2, Wand2 } from 'lucide-react';
-import { generateDisruption, saveSimulationScenario, generateSampleSystem, resetState, getSimulationScenario } from '../services/api';
+import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw, ChevronRight, CheckCircle2, Wand2, Timer, Activity, Zap } from 'lucide-react';
+import { generateDisruption, saveSimulationScenario, generateSampleSystem, resetState, getSimulationScenario, getPipelineStatus } from '../services/api';
 import { useApproval } from '../context/ApprovalContext';
 
 function MapClickCapture({ onClick }) {
@@ -18,6 +18,15 @@ export default function Simulation() {
   const [lastMessage, setLastMessage] = useState('');
   const [pipeline, setPipeline] = useState(null);
   const { refresh: refreshApprovals } = useApproval();
+  const [pipelineStatus, setPipelineStatus] = useState(null);
+
+  // Poll pipeline status every 5 seconds
+  useEffect(() => {
+    const fetchStatus = () => getPipelineStatus().then(setPipelineStatus);
+    fetchStatus();
+    const id = setInterval(fetchStatus, 5000);
+    return () => clearInterval(id);
+  }, []);
 
   const [warehouseDraft, setWarehouseDraft] = useState({ name: '', lat: '', lng: '' });
   const [routeDraft, setRouteDraft] = useState({ fromWarehouseId: '', toWarehouseId: '', distanceKm: 400, typicalEtaMinutes: 180 });
@@ -85,6 +94,17 @@ export default function Simulation() {
       .filter(Boolean);
   }, [scenario.shipments, scenario.routes, warehousesById]);
 
+  // Auto-save helper — silently pushes updated scenario to backend
+  const autoSave = async (updatedScenario) => {
+    try {
+      await saveSimulationScenario(updatedScenario);
+      setScenarioSaved(true);
+    } catch {
+      // Silent fail — user can still manually save later
+      setScenarioSaved(false);
+    }
+  };
+
   const addWarehouse = () => {
     if (!warehouseDraft.name || warehouseDraft.lat === '' || warehouseDraft.lng === '') return;
     const nextId = scenario.warehouses.reduce((max, w) => Math.max(max, Number(w.id)), 0) + 1;
@@ -93,7 +113,7 @@ export default function Simulation() {
       warehouses: [...scenario.warehouses, { id: nextId, name: warehouseDraft.name, lat: Number(warehouseDraft.lat), lng: Number(warehouseDraft.lng), status: 'active' }],
     };
     setScenario(nextScenario);
-    setScenarioSaved(false);
+    autoSave(nextScenario);
     setRouteDraft((prev) => ({
       ...prev,
       fromWarehouseId: prev.fromWarehouseId || nextScenario.warehouses?.[0]?.id || '',
@@ -113,22 +133,21 @@ export default function Simulation() {
       distanceKm: Number(routeDraft.distanceKm),
       typicalEtaMinutes: Number(routeDraft.typicalEtaMinutes),
     };
-    setScenario((prev) => ({
-      ...prev,
-      routes: [...prev.routes, nextRoute],
-    }));
-    setScenarioSaved(false);
+    const nextScenario = { ...scenario, routes: [...scenario.routes, nextRoute] };
+    setScenario(nextScenario);
+    autoSave(nextScenario);
     setShipmentDraft((prev) => ({ ...prev, routeId: prev.routeId || nextRoute.id }));
   };
 
   const addCarrier = () => {
     if (!carrierDraft.name) return;
     const nextId = scenario.carriers.reduce((max, c) => Math.max(max, Number(c.id)), 0) + 1;
-    setScenario((prev) => ({
-      ...prev,
-      carriers: [...prev.carriers, { id: nextId, ...carrierDraft, reliability: Number(carrierDraft.reliability), capacity: Number(carrierDraft.capacity) }],
-    }));
-    setScenarioSaved(false);
+    const nextScenario = {
+      ...scenario,
+      carriers: [...scenario.carriers, { id: nextId, ...carrierDraft, reliability: Number(carrierDraft.reliability), capacity: Number(carrierDraft.capacity) }],
+    };
+    setScenario(nextScenario);
+    autoSave(nextScenario);
     setShipmentDraft((prev) => ({ ...prev, carrierId: prev.carrierId || nextId }));
     setCarrierDraft({ name: '', reliability: 90, capacity: 250 });
   };
@@ -136,24 +155,49 @@ export default function Simulation() {
   const addShipment = () => {
     if (!shipmentDraft.routeId || !shipmentDraft.carrierId) return;
     const nextId = `SHP-${Math.floor(1000 + Math.random() * 8999)}`;
-    setScenario((prev) => ({
-      ...prev,
-      shipments: [
-        ...prev.shipments,
-        {
-          id: nextId,
-          routeId: shipmentDraft.routeId,
-          carrierId: Number(shipmentDraft.carrierId),
-          progress: Number(shipmentDraft.progress),
-          risk: Number(shipmentDraft.risk),
-          status: shipmentDraft.status,
-          slaMinutes: Number(shipmentDraft.slaMinutes),
-          etaMinutes: Number(shipmentDraft.etaMinutes),
-          notes: shipmentDraft.notes,
-        },
-      ],
-    }));
-    setScenarioSaved(false);
+
+    // Resolve route display string from warehouses
+    const rte = scenario.routes.find((r) => r.id === shipmentDraft.routeId);
+    let routeLabel = '';
+    if (rte) {
+      const fromW = scenario.warehouses.find((w) => Number(w.id) === Number(rte.fromWarehouseId));
+      const toW = scenario.warehouses.find((w) => Number(w.id) === Number(rte.toWarehouseId));
+      const fromName = (fromW?.name || 'Origin').replace(' Hub', '');
+      const toName = (toW?.name || 'Destination').replace(' Hub', '');
+      routeLabel = `${fromName} → ${toName}`;
+    }
+
+    // Resolve carrier name
+    const cr = scenario.carriers.find((c) => Number(c.id) === Number(shipmentDraft.carrierId));
+    const carrierName = cr?.name || 'Unknown';
+
+    // Format ETA
+    const etaMins = Number(shipmentDraft.etaMinutes) || 0;
+    const etaStr = `${Math.floor(etaMins / 60)}h ${etaMins % 60}m`;
+
+    // Derive SLA label
+    const slaMins = Number(shipmentDraft.slaMinutes) || 420;
+    const slaLabel = slaMins <= 180 ? 'Priority' : slaMins <= 360 ? 'Express' : slaMins <= 600 ? 'Standard' : 'Economy';
+
+    const newShipment = {
+      id: nextId,
+      routeId: shipmentDraft.routeId,
+      carrierId: Number(shipmentDraft.carrierId),
+      route: routeLabel,
+      carrier: carrierName,
+      progress: Number(shipmentDraft.progress),
+      eta: etaStr,
+      sla: slaLabel,
+      risk: Number(shipmentDraft.risk),
+      status: shipmentDraft.status,
+      agent: '—',
+      slaMinutes: Number(shipmentDraft.slaMinutes),
+      etaMinutes: etaMins,
+      notes: shipmentDraft.notes || 'Manually created shipment',
+    };
+    const nextScenario = { ...scenario, shipments: [...scenario.shipments, newShipment] };
+    setScenario(nextScenario);
+    autoSave(nextScenario);
     setDisruptionDraft((prev) => ({ ...prev, targetShipmentId: prev.targetShipmentId || nextId }));
   };
 
@@ -233,13 +277,16 @@ export default function Simulation() {
         severity: Number(disruptionDraft.severity),
       };
       const res = await generateDisruption(payload);
-      setLastMessage(res.data?.message || 'Disruption generated.');
+      const buffered = res.data?.buffered_count || 0;
+      setLastMessage(res.data?.message || `Disruption buffered (${buffered} queued).`);
+      // Show last cycle if available
       setPipeline(res.data?.pipeline || null);
       // Refresh scenario so the map reflects disruption changes
       if (res.data?.scenario) {
         setScenario(res.data.scenario);
       }
-      // Immediately check for new approvals queued by the pipeline
+      // Refresh pipeline status and approvals
+      getPipelineStatus().then(setPipelineStatus);
       refreshApprovals();
     } catch {
       setLastMessage('Failed to generate disruption.');
@@ -519,15 +566,67 @@ export default function Simulation() {
             </button>
           </div>
 
-          {pipeline && (
-            <div className="border border-border rounded-xl p-3 bg-bg space-y-2">
-              <div className="flex items-center gap-1 text-xs text-amber"><Sparkles className="w-3 h-3" />Pipeline executed immediately</div>
-              <div className="text-[11px] text-text/70">Observer: {(pipeline.observer?.observations || []).length} observation groups</div>
-              <div className="text-[11px] text-text/70">Reasoner: {(pipeline.reasoner?.hypotheses || []).length} hypotheses</div>
-              <div className="text-[11px] text-text/70">Decider: {(pipeline.decider?.actions || []).length} actions</div>
-              <div className="text-[11px] text-text/70">Queued approvals: {pipeline.queuedApprovals}</div>
+          {/* Live Pipeline Status Panel */}
+          <div className="border border-border rounded-xl p-4 bg-bg space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${pipelineStatus?.running ? 'bg-green animate-pulse' : 'bg-muted'}`} />
+                <span className="text-xs font-semibold text-text">Pipeline Scheduler</span>
+              </div>
+              <span className="text-[10px] text-muted font-mono">
+                {pipelineStatus?.running ? `Every ${pipelineStatus.interval_seconds}s` : 'Stopped'}
+              </span>
             </div>
-          )}
+
+            <div className="grid grid-cols-3 gap-2">
+              <div className="bg-surface border border-border rounded-lg p-2 text-center">
+                <div className="text-[9px] text-muted uppercase">Buffered</div>
+                <div className={`text-lg font-bold font-mono ${(pipelineStatus?.buffered_anomalies || 0) > 0 ? 'text-amber' : 'text-muted'}`}>
+                  {pipelineStatus?.buffered_anomalies || 0}
+                </div>
+              </div>
+              <div className="bg-surface border border-border rounded-lg p-2 text-center">
+                <div className="text-[9px] text-muted uppercase">Cycles</div>
+                <div className="text-lg font-bold font-mono text-blue">{pipelineStatus?.cycles_completed || 0}</div>
+              </div>
+              <div className="bg-surface border border-border rounded-lg p-2 text-center">
+                <div className="text-[9px] text-muted uppercase">Interval</div>
+                <div className="text-lg font-bold font-mono text-green">{pipelineStatus?.interval_seconds || 25}s</div>
+              </div>
+            </div>
+
+            {pipelineStatus?.last_cycle && (
+              <div className="space-y-1.5 border-t border-border pt-3">
+                <div className="flex items-center gap-1 text-xs text-amber font-medium">
+                  <Sparkles className="w-3 h-3" />
+                  Last Cycle: {pipelineStatus.last_cycle.cycle_id}
+                </div>
+                <div className="text-[11px] text-text/70">
+                  <Activity className="w-3 h-3 inline mr-1" />
+                  {pipelineStatus.last_cycle.buffered_anomalies_count} anomalies → {(pipelineStatus.last_cycle.observations || []).length} observations
+                </div>
+                <div className="text-[11px] text-text/70">
+                  <Zap className="w-3 h-3 inline mr-1" />
+                  {(pipelineStatus.last_cycle.hypotheses || []).length} hypotheses → {(pipelineStatus.last_cycle.actions || []).length} actions
+                </div>
+                <div className="text-[11px] text-text/70">
+                  <Timer className="w-3 h-3 inline mr-1" />
+                  {pipelineStatus.last_cycle.queued_approvals || 0} approvals queued
+                </div>
+                {pipelineStatus.last_cycle.summaries && (
+                  <div className="text-[10px] text-muted mt-1 italic">
+                    {pipelineStatus.last_cycle.summaries.observer}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {!pipelineStatus?.last_cycle && (
+              <div className="text-center py-2">
+                <p className="text-[11px] text-muted">No cycles run yet — generate disruptions and the pipeline will process them automatically.</p>
+              </div>
+            )}
+          </div>
       </div>
       </div>
 
@@ -822,7 +921,14 @@ export default function Simulation() {
                   className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
                 >
                   <option value="">Select route</option>
-                  {scenario.routes.map((r) => <option key={r.id} value={r.id}>{r.id}</option>)}
+                  {scenario.routes.map((r) => {
+                    const fromW = scenario.warehouses.find((w) => Number(w.id) === Number(r.fromWarehouseId));
+                    const toW = scenario.warehouses.find((w) => Number(w.id) === Number(r.toWarehouseId));
+                    const label = fromW && toW
+                      ? `${fromW.name.replace(' Hub', '')} → ${toW.name.replace(' Hub', '')} (${r.id})`
+                      : r.id;
+                    return <option key={r.id} value={r.id}>{label}</option>;
+                  })}
                 </select>
               </div>
               <div>

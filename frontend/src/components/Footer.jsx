@@ -20,7 +20,7 @@ export default function Footer() {
         <span className="text-border">|</span>
         <div className="flex items-center gap-1">
           <Activity className="w-3 h-3 text-amber/60" />
-          <span className="text-[10px] text-muted/60 font-mono">CHAINMIND v2.4.1</span>
+          <span className="text-[10px] text-muted/60 font-mono">SCHNELLXAI v2.4.1</span>
         </div>
       </div>
     </footer>

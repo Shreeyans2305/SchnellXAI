@@ -14,8 +14,8 @@ export default function Sidebar() {
   return (
     <aside className="w-16 bg-sidebar flex flex-col items-center py-6 shrink-0 rounded-r-3xl shadow-lg z-10">
       {/* Logo */}
-      <div className="w-10 h-10 rounded-xl bg-amber/20 flex items-center justify-center mb-8">
-        <span className="text-amber font-bold text-lg">C</span>
+      <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center mb-8">
+        <img src="/logo.webp" alt="SchnellXAI" className="w-10 h-10 object-cover" />
       </div>
 
       <nav className="flex flex-col gap-2 items-center flex-1">

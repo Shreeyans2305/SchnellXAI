@@ -11,31 +11,38 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-5 px-6 pb-6 overflow-y-auto h-full">
-      {/* Approval Alert Banner — inline on dashboard (mirrors global but styled as a card) */}
+
+      {/* Approval Banner — scrolls with content */}
       {pendingApproval ? (
         <button
           onClick={() => setShowModal(true)}
           className="w-full flex items-center gap-3 bg-amber/5 border border-amber/20 rounded-2xl p-4 hover:bg-amber/10 transition-colors text-left group shadow-card"
         >
           <div className="w-10 h-10 bg-amber/20 rounded-xl flex items-center justify-center shrink-0">
-            <Bell className="w-5 h-5 text-amber" />
+            <Bell className="w-5 h-5 text-amber animate-pulse" />
           </div>
-          <div className="flex-1">
-            <div className="text-sm font-semibold text-amber">Pending Approval — Decider Agent</div>
-            <div className="text-xs text-muted mt-0.5">{pendingApproval.action || 'Action requires authorization'}</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold text-amber">
+              Pending Approval — {pendingApproval.shipmentId || pendingApproval.shipment_id || 'Shipment'}
+            </div>
+            <div className="text-xs text-muted mt-0.5 truncate">
+              {pendingApproval.action || 'Action requires human authorization'}
+            </div>
           </div>
-          <span className="text-xs text-amber border border-amber/30 px-3 py-1.5 rounded-xl font-medium group-hover:bg-amber group-hover:text-white transition-colors">
-            Review
-          </span>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="text-xs text-amber border border-amber/30 px-3 py-1.5 rounded-xl font-medium group-hover:bg-amber group-hover:text-white transition-colors">
+              Review
+            </span>
+          </div>
         </button>
       ) : (
-        <div className="w-full flex items-center gap-3 bg-bg border border-border rounded-2xl p-4 shadow-card">
-          <div className="w-10 h-10 bg-green/10 rounded-xl flex items-center justify-center shrink-0">
-            <Bell className="w-5 h-5 text-green/50" />
+        <div className="w-full flex items-center gap-3 bg-green/5 border border-green/20 rounded-2xl p-4 shadow-card">
+          <div className="w-10 h-10 bg-green/20 rounded-xl flex items-center justify-center shrink-0">
+            <CheckCircle2 className="w-5 h-5 text-green" />
           </div>
-          <div className="flex-1">
-            <div className="text-sm font-medium text-muted">No pending approvals</div>
-            <div className="text-xs text-muted/60 mt-0.5">All agent actions are either auto-approved or awaiting simulation</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold text-green">No Actions Need Approval</div>
+            <div className="text-xs text-muted mt-0.5">All agent decisions are within autonomous thresholds</div>
           </div>
         </div>
       )}

@@ -6,7 +6,7 @@ import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import ApprovalModal from './components/ApprovalModal';
 import { ApprovalProvider, useApproval } from './context/ApprovalContext';
-import { Activity, Bell } from 'lucide-react';
+import { Activity } from 'lucide-react';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Simulation = lazy(() => import('./pages/Simulation'));
@@ -16,28 +16,6 @@ function LoadingFallback() {
     <div className="flex items-center justify-center h-full">
       <Activity className="w-8 h-8 text-amber animate-spin" />
     </div>
-  );
-}
-
-function GlobalApprovalBanner() {
-  const { pendingApproval, setShowModal } = useApproval();
-  if (!pendingApproval) return null;
-  return (
-    <button
-      onClick={() => setShowModal(true)}
-      className="w-full flex items-center gap-3 bg-amber/5 border-b border-amber/20 px-5 py-3 hover:bg-amber/10 transition-colors text-left group"
-    >
-      <div className="w-8 h-8 bg-amber/20 rounded-xl flex items-center justify-center shrink-0 animate-pulse">
-        <Bell className="w-4 h-4 text-amber" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-semibold text-amber">Pending Approval — Decider Agent</div>
-        <div className="text-xs text-muted mt-0.5 truncate">{pendingApproval.action || 'Action requires human authorization'}</div>
-      </div>
-      <span className="text-xs text-amber border border-amber/30 px-3 py-1.5 rounded-xl font-medium group-hover:bg-amber group-hover:text-white transition-colors shrink-0">
-        Review
-      </span>
-    </button>
   );
 }
 
@@ -61,9 +39,6 @@ export default function App() {
 
         {/* Navbar */}
         <Navbar />
-
-        {/* Global Approval Banner — visible on every page */}
-        <GlobalApprovalBanner />
 
         {/* Content */}
         <main className="flex-1 overflow-hidden">

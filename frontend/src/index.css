@@ -37,6 +37,18 @@ body {
   background: #f0f1f5 !important;
 }
 
+/* Strip ALL Leaflet marker defaults so emoji divIcons render cleanly */
+.leaflet-marker-icon {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.emoji-icon {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
 .leaflet-tile-pane {
   filter: none;
 }

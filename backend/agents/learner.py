@@ -58,6 +58,8 @@ Extract lessons and patterns to remember.
         result = {"lessons": _fallback_lessons(state)}
 
     lessons = result.get("lessons", [])
+    # Guard: LLM may return lessons as strings instead of dicts
+    lessons = [l for l in lessons if isinstance(l, dict)]
     now = datetime.utcnow().isoformat()
     cycle_id = state.get("cycle_id", "?")
 

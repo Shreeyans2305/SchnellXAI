@@ -25,18 +25,18 @@ HUBS = [
             ("Ahmedabad Hub", 23.022, 72.571, "active"),
             ("Jaipur Hub", 26.912, 75.787, "active"),
             ("Lucknow Hub", 26.846, 80.946, "active"),
-            ("Nagpur Hub", 21.145, 79.088, "congested"),
+            ("Nagpur Hub", 21.145, 79.088, "active"),
             ("Bhopal Hub", 23.259, 77.412, "active"),
         ]
     )
 ]
 
 CARRIERS = [
-    {"id": 1, "name": "BlueDart", "reliability": 94, "active": 342, "delayed": 12},
-    {"id": 2, "name": "Delhivery", "reliability": 91, "active": 287, "delayed": 18},
-    {"id": 3, "name": "DTDC", "reliability": 87, "active": 198, "delayed": 24},
-    {"id": 4, "name": "XpressBees", "reliability": 89, "active": 156, "delayed": 15},
-    {"id": 5, "name": "Shadowfax", "reliability": 85, "active": 134, "delayed": 20},
+    {"id": 1, "name": "BlueDart", "reliability": 97, "active": 342, "delayed": 0},
+    {"id": 2, "name": "Delhivery", "reliability": 95, "active": 287, "delayed": 0},
+    {"id": 3, "name": "DTDC", "reliability": 93, "active": 198, "delayed": 0},
+    {"id": 4, "name": "XpressBees", "reliability": 94, "active": 156, "delayed": 0},
+    {"id": 5, "name": "Shadowfax", "reliability": 92, "active": 134, "delayed": 0},
 ]
 
 
@@ -52,10 +52,9 @@ def _make_shipment(idx: int) -> dict:
         ("Ahmedabad", "Mumbai", "DTDC"),
     ]
     frm, to, carrier = routes[idx % len(routes)]
-    progress = random.randint(5, 95)
-    risk = random.randint(5, 95)
-    status = "DELAYED" if risk > 80 else "AT RISK" if risk > 55 else "ON TRACK"
-    eta_minutes = int((100 - progress) / 100 * random.randint(60, 480))
+    progress = random.randint(10, 80)
+    risk = random.randint(0, 15)
+    eta_minutes = int((100 - progress) / 100 * random.randint(60, 300))
     return {
         "id": f"SHP-{4000 + idx * 37}",
         "route": f"{frm} → {to}",
@@ -64,9 +63,9 @@ def _make_shipment(idx: int) -> dict:
         "eta": f"{eta_minutes // 60}h {eta_minutes % 60}m",
         "sla": random.choice(["Standard", "Express", "Priority", "Economy"]),
         "risk": risk,
-        "agent": random.choice(["Observer", "Reasoner", "Decider", "Executor"]),
-        "status": status,
-        "notes": "Auto-generated shipment",
+        "agent": "—",
+        "status": "ON TRACK",
+        "notes": "All systems nominal",
     }
 
 
@@ -96,9 +95,9 @@ def generate_sample_state() -> dict:
         {"id": 8, "name": "Hyderabad Hub", "lat": 17.385, "lng": 78.486, "shipments": 0, "status": "active"},
     ]
     sample_carriers = [
-        {"id": 1, "name": "BlueDart", "reliability": 94, "capacity": 350},
-        {"id": 2, "name": "Delhivery", "reliability": 91, "capacity": 300},
-        {"id": 3, "name": "DTDC", "reliability": 87, "capacity": 220},
+        {"id": 1, "name": "BlueDart", "reliability": 97, "capacity": 350},
+        {"id": 2, "name": "Delhivery", "reliability": 95, "capacity": 300},
+        {"id": 3, "name": "DTDC", "reliability": 93, "capacity": 220},
     ]
     sample_routes = [
         {"id": "RTE-1001", "fromWarehouseId": 1, "toWarehouseId": 2, "distanceKm": 1410, "typicalEtaMinutes": 420},
@@ -118,10 +117,9 @@ def generate_sample_state() -> dict:
     ]
     sample_shipments = []
     for i, (route_id, carrier_id, route_label, carrier_name) in enumerate(route_data):
-        progress = random.randint(10, 85)
-        risk = random.randint(10, 50)
-        status = "ON TRACK" if risk < 40 else "AT RISK"
-        eta_minutes = int((100 - progress) / 100 * random.randint(120, 480))
+        progress = random.randint(10, 75)
+        risk = random.randint(0, 10)
+        eta_minutes = int((100 - progress) / 100 * random.randint(120, 360))
         sample_shipments.append({
             "id": f"SHP-{5000 + i * 111}",
             "routeId": route_id,
@@ -133,8 +131,8 @@ def generate_sample_state() -> dict:
             "sla": random.choice(["Standard", "Express", "Priority"]),
             "risk": risk,
             "agent": "—",
-            "status": status,
-            "notes": "Sample shipment — run disruptions to test the AI agents",
+            "status": "ON TRACK",
+            "notes": "All systems nominal — generate disruptions to test AI agents",
         })
     return {
         "shipments": sample_shipments,

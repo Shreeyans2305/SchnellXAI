@@ -26,3 +26,7 @@ class AgentState(TypedDict):
     cycle_id: str
     timestamp: str
     event_log: list[dict]
+
+    # Batched pipeline fields
+    buffered_anomalies: list[dict]   # raw disruptions collected since last cycle
+    anomaly_history: list[dict]      # long-term anomaly log for learning context

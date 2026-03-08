@@ -1,20 +1,56 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMap } from 'react-leaflet';
+import { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, Polyline, Popup, Marker } from 'react-leaflet';
+import L from 'leaflet';
 import { getHubs, getShipmentLocations } from '../services/api';
 import { Map as MapIcon } from 'lucide-react';
 
-function AnimatedMarker({ position, status, id }) {
-  const color = status === 'DELAYED' ? '#b32826' : status === 'AT RISK' ? '#f5a623' : '#42d65c';
+/* ── Nuke Leaflet's default broken icon setup ──────────────────── */
+delete L.Icon.Default.prototype._getIconUrl;
 
+/* ── Helper: build a zero-size divIcon with an absolutely-positioned
+     emoji that cannot be clipped or overridden by Leaflet CSS ──── */
+function emojiIcon(emoji, fontSize = 24) {
+  return L.divIcon({
+    className: '',                     // no leaflet classes at all
+    iconSize: [0, 0],                  // zero container → nothing to clip
+    iconAnchor: [0, 0],
+    popupAnchor: [0, -(fontSize / 2) - 6],
+    html: `<span style="
+      position:absolute;
+      left:0; top:0;
+      transform:translate(-50%,-50%);
+      font-size:${fontSize}px;
+      line-height:1;
+      white-space:nowrap;
+      pointer-events:auto;
+      cursor:pointer;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.5));
+      background:none; border:none;
+    ">${emoji}</span>`,
+  });
+}
+
+/* ── Concrete icons ────────────────────────────────────────────── */
+function hubMarkerIcon(hub) {
+  const congested = hub.status === 'congested';
+  return emojiIcon(congested ? '⛔' : '🏭', congested ? 30 : 26);
+}
+
+function shipmentMarkerIcon(status) {
+  const dot = status === 'DELAYED' ? '🔴' : status === 'AT RISK' ? '🟡' : '🟢';
+  return emojiIcon(`📦${dot}`, 18);
+}
+
+function ShipmentMarker({ position, status, id }) {
   return (
-    <CircleMarker center={position} radius={5} pathOptions={{ color, fillColor: color, fillOpacity: 0.9, weight: 2 }}>
+    <Marker position={position} icon={shipmentMarkerIcon(status)}>
       <Popup>
         <div className="text-xs font-mono">
-          <div className="font-bold">{id}</div>
-          <div>{status}</div>
+          <div className="font-bold">📦 {id}</div>
+          <div>{status === 'DELAYED' ? '🔴' : status === 'AT RISK' ? '🟡' : '🟢'} {status}</div>
         </div>
       </Popup>
-    </CircleMarker>
+    </Marker>
   );
 }
 
@@ -26,29 +62,6 @@ function MapContent({ hubs, shipments }) {
         attribution='&copy; OpenStreetMap'
       />
 
-      {/* Hub markers */}
-      {hubs.map((hub) => (
-        <CircleMarker
-          key={hub.id}
-          center={[hub.lat, hub.lng]}
-          radius={hub.status === 'congested' ? 10 : 7}
-          pathOptions={{
-            color: hub.status === 'congested' ? '#b32826' : '#f5a623',
-            fillColor: hub.status === 'congested' ? '#b32826' : '#f5a623',
-            fillOpacity: 0.3,
-            weight: 1.5,
-          }}
-        >
-          <Popup>
-            <div className="text-xs">
-              <div className="font-bold">{hub.name}</div>
-              <div>Shipments: {hub.shipments}</div>
-              <div>Status: {hub.status}</div>
-            </div>
-          </Popup>
-        </CircleMarker>
-      ))}
-
       {/* Route lines */}
       {shipments.map((s) => (
         <Polyline
@@ -57,15 +70,30 @@ function MapContent({ hubs, shipments }) {
           pathOptions={{
             color: s.status === 'DELAYED' ? '#b32826' : s.status === 'AT RISK' ? '#f5a623' : '#42d65c',
             weight: 1.5,
-            opacity: 0.4,
+            opacity: 0.35,
             dashArray: '8 6',
           }}
         />
       ))}
 
-      {/* Shipment markers */}
+      {/* Hub (warehouse) markers — emoji */}
+      {hubs.map((hub) => (
+        <Marker key={hub.id} position={[hub.lat, hub.lng]} icon={hubMarkerIcon(hub)}>
+          <Popup>
+            <div className="text-xs">
+              <div className="font-bold">
+                {hub.status === 'congested' ? '⛔' : '🏭'} {hub.name}
+              </div>
+              <div className="mt-0.5">📦 Shipments: {hub.shipments}</div>
+              <div>Status: <span className="font-semibold">{hub.status === 'congested' ? '⚠️ Congested' : '✅ Normal'}</span></div>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+
+      {/* Shipment markers — emoji */}
       {shipments.map((s) => (
-        <AnimatedMarker key={s.id} position={[s.lat, s.lng]} status={s.status} id={s.id} />
+        <ShipmentMarker key={s.id} position={[s.lat, s.lng]} status={s.status} id={s.id} />
       ))}
     </>
   );
@@ -85,6 +113,8 @@ export default function ShipmentMap() {
     const id = setInterval(fetchData, 15000);
     return () => clearInterval(id);
   }, []);
+
+
 
   return (
     <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
@@ -106,15 +136,28 @@ export default function ShipmentMap() {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 p-3 border-t border-border">
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 p-3 border-t border-border">
+        <span className="text-[10px] text-muted/60 uppercase tracking-wider font-semibold mr-1">Shipments</span>
         {[
-          { color: 'bg-green', label: 'On Track' },
-          { color: 'bg-amber', label: 'At Risk' },
-          { color: 'bg-red', label: 'Delayed' },
-          { color: 'bg-amber/50', label: 'Hub' },
+          { emoji: '📦🟢', label: 'On Track' },
+          { emoji: '📦🟡', label: 'At Risk' },
+          { emoji: '📦🔴', label: 'Delayed' },
         ].map((l) => (
-          <div key={l.label} className="flex items-center gap-1.5">
-            <span className={`w-2.5 h-2.5 rounded-full ${l.color}`} />
+          <div key={l.label} className="flex items-center gap-1">
+            <span className="text-xs">{l.emoji}</span>
+            <span className="text-[10px] text-muted">{l.label}</span>
+          </div>
+        ))}
+
+        <span className="w-px h-3 bg-border mx-1" />
+
+        <span className="text-[10px] text-muted/60 uppercase tracking-wider font-semibold mr-1">Warehouses</span>
+        {[
+          { emoji: '🏭', label: 'Normal' },
+          { emoji: '⛔', label: 'Congested' },
+        ].map((l) => (
+          <div key={l.label} className="flex items-center gap-1">
+            <span className="text-xs">{l.emoji}</span>
             <span className="text-[10px] text-muted">{l.label}</span>
           </div>
         ))}

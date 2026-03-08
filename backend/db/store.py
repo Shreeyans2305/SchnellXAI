@@ -46,6 +46,16 @@ def init_db():
                 params_json  TEXT,
                 outcome      TEXT
             );
+            CREATE TABLE IF NOT EXISTS anomaly_log (
+                id               TEXT PRIMARY KEY,
+                timestamp        TEXT,
+                type             TEXT,
+                source           TEXT DEFAULT 'disruption',
+                severity         INTEGER DEFAULT 50,
+                target_shipment  TEXT DEFAULT '',
+                target_hub       TEXT DEFAULT '',
+                payload_json     TEXT
+            );
         """
         )
 

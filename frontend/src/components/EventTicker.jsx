@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { getEvents } from '../services/api';
 
 const typeColors = {
@@ -9,15 +9,16 @@ const typeColors = {
   APPROVAL: 'text-amber',
   EXECUTE: 'text-green',
   OPTIMIZE: 'text-blue',
+  MONITOR: 'text-slate',
 };
 
-/* Consistent scroll speed regardless of content length */
-const SCROLL_SPEED_PX_PER_SEC = 60;
+const SCROLL_SPEED_PX_PER_SEC = 50;
 
 export default function EventTicker() {
   const [events, setEvents] = useState([]);
-  const [duration, setDuration] = useState(30);
+  const wrapperRef = useRef(null);
   const trackRef = useRef(null);
+  const styleRef = useRef(null);
 
   useEffect(() => {
     getEvents().then(setEvents);
@@ -25,17 +26,45 @@ export default function EventTicker() {
     return () => clearInterval(id);
   }, []);
 
-  /* Recalculate duration whenever events change so speed stays constant */
+  /* Inject / update a <style> tag so we never re-trigger the animation on data change */
+  const syncDuration = useCallback(() => {
+    if (!trackRef.current) return;
+    const halfWidth = trackRef.current.scrollWidth / 2;
+    if (halfWidth < 50) return;
+    const secs = Math.max(15, halfWidth / SCROLL_SPEED_PX_PER_SEC);
+
+    if (!styleRef.current) {
+      styleRef.current = document.createElement('style');
+      document.head.appendChild(styleRef.current);
+    }
+    styleRef.current.textContent = `
+      @keyframes ticker-scroll {
+        0%   { transform: translate3d(0, 0, 0); }
+        100% { transform: translate3d(-50%, 0, 0); }
+      }
+      .ticker-track {
+        will-change: transform;
+        animation: ticker-scroll ${secs}s linear infinite;
+      }
+    `;
+  }, []);
+
   useEffect(() => {
-    if (!trackRef.current || events.length === 0) return;
-    // Small delay to let the DOM render so scrollWidth is accurate
-    const frame = requestAnimationFrame(() => {
-      const halfWidth = trackRef.current.scrollWidth / 2;
-      const secs = Math.max(10, halfWidth / SCROLL_SPEED_PX_PER_SEC);
-      setDuration(secs);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [events]);
+    if (events.length === 0) return;
+    // wait one frame for DOM to paint new items
+    const raf = requestAnimationFrame(syncDuration);
+    return () => cancelAnimationFrame(raf);
+  }, [events, syncDuration]);
+
+  // Cleanup style tag on unmount
+  useEffect(() => {
+    return () => {
+      if (styleRef.current) {
+        styleRef.current.remove();
+        styleRef.current = null;
+      }
+    };
+  }, []);
 
   if (!events.length) {
     return (
@@ -48,14 +77,11 @@ export default function EventTicker() {
   const doubled = [...events, ...events];
 
   return (
-    <div className="w-full bg-surface border-b border-border overflow-hidden h-9 flex items-center shadow-sm">
-      <div
-        ref={trackRef}
-        className="flex whitespace-nowrap"
-        style={{
-          animation: `ticker ${duration}s linear infinite`,
-        }}
-      >
+    <div
+      ref={wrapperRef}
+      className="w-full bg-surface border-b border-border overflow-hidden h-9 flex items-center shadow-sm"
+    >
+      <div ref={trackRef} className="ticker-track flex whitespace-nowrap">
         {doubled.map((e, i) => (
           <span key={i} className="inline-flex items-center gap-2 px-6 text-xs font-mono">
             <span className="text-muted">{e.time}</span>
