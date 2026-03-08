@@ -68,18 +68,8 @@ const mockCarriers = [
   { id: 5, name: 'Shadowfax', reliability: 85, active: 134, delayed: 20, trend: [80, 82, 83, 84, 85, 84, 85], logo: 'SF' },
 ];
 
-const mockApproval = {
-  id: 'APR-001',
-  shipmentId: 'SHP-4821',
-  action: 'Reroute SHP-4821 via Pune Hub',
-  currentRoute: ['Mumbai', 'Nagpur', 'Delhi'],
-  proposedRoute: ['Mumbai', 'Pune', 'Bhopal', 'Delhi'],
-  blastRadius: 3,
-  netScore: 82,
-  costDelta: '+₹2,400',
-  slaImpact: '+2h',
-  reason: 'Nagpur hub throughput dropped 34%. Historical data shows Pune route is 12% faster during congestion events.',
-};
+// No mock approval — only show real approvals from the backend
+const mockApproval = null;
 
 const mockHubs = [
   { id: 1, name: 'Mumbai Hub', lat: 19.076, lng: 72.8777, shipments: 342, status: 'active' },

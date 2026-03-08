@@ -1,25 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { X, CheckCircle, XCircle, AlertTriangle, ArrowRight } from 'lucide-react';
-import { getApproval, executeApproval, rejectApproval } from '../services/api';
+import { executeApproval, rejectApproval } from '../services/api';
+import { useApproval } from '../context/ApprovalContext';
 
 export default function ApprovalModal({ onClose }) {
-  const [approval, setApproval] = useState(null);
+  const { pendingApproval: approval, refresh } = useApproval();
   const [executing, setExecuting] = useState(false);
-
-  useEffect(() => {
-    getApproval().then(setApproval);
-  }, []);
 
   if (!approval) return null;
 
   const handleApprove = async () => {
     setExecuting(true);
     await executeApproval(approval.id);
+    refresh();
     onClose?.();
   };
 
   const handleReject = async () => {
     await rejectApproval(approval.id);
+    refresh();
     onClose?.();
   };
 

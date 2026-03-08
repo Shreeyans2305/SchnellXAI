@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMapEvents } from 'react-leaflet';
 import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw, ChevronRight, CheckCircle2, Wand2 } from 'lucide-react';
 import { generateDisruption, saveSimulationScenario, generateSampleSystem, resetState, getSimulationScenario } from '../services/api';
+import { useApproval } from '../context/ApprovalContext';
 
 function MapClickCapture({ onClick }) {
   useMapEvents({
@@ -16,6 +17,7 @@ export default function Simulation() {
   const [scenarioSaved, setScenarioSaved] = useState(false);
   const [lastMessage, setLastMessage] = useState('');
   const [pipeline, setPipeline] = useState(null);
+  const { refresh: refreshApprovals } = useApproval();
 
   const [warehouseDraft, setWarehouseDraft] = useState({ name: '', lat: '', lng: '' });
   const [routeDraft, setRouteDraft] = useState({ fromWarehouseId: '', toWarehouseId: '', distanceKm: 400, typicalEtaMinutes: 180 });
@@ -237,6 +239,8 @@ export default function Simulation() {
       if (res.data?.scenario) {
         setScenario(res.data.scenario);
       }
+      // Immediately check for new approvals queued by the pipeline
+      refreshApprovals();
     } catch {
       setLastMessage('Failed to generate disruption.');
     }
