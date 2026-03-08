@@ -352,75 +352,167 @@ export default function Simulation() {
               ⚠️ Complete all steps and save the scenario first to unlock disruption generation.
             </div>
           )}
-          
+
+          {/* Disruption type selector */}
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { type: 'late_pickup', icon: '📦', label: 'Late Pickup' },
+              { type: 'warehouse_congestion', icon: '🏭', label: 'Warehouse Congestion' },
+              { type: 'inaccurate_eta', icon: '⏱️', label: 'Inaccurate ETA' },
+              { type: 'cascading_reroute', icon: '🔄', label: 'Cascading Reroute' },
+            ].map((d) => (
+              <button
+                key={d.type}
+                disabled={!canRunDisruptions}
+                onClick={() => setDisruptionDraft((p) => ({ ...p, type: d.type }))}
+                className={`rounded-xl text-xs py-2.5 font-semibold border transition-all disabled:opacity-40 ${
+                  disruptionDraft.type === d.type
+                    ? 'bg-red/10 border-red/40 text-red ring-1 ring-red/30'
+                    : 'bg-bg border-border text-muted hover:bg-red/5 hover:border-red/20 hover:text-red'
+                }`}
+              >
+                {d.icon} {d.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Type-specific fields */}
           <div className="space-y-2">
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="text-[10px] text-muted mb-1 block">Target Shipment (optional)</label>
-                <select 
-                  disabled={!canRunDisruptions}
-                  value={disruptionDraft.targetShipmentId} 
-                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} 
-                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
-                >
-                  <option value="">Auto-select highest risk</option>
-                  {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] text-muted mb-1 block">Target Warehouse (optional)</label>
-                <select 
-                  disabled={!canRunDisruptions}
-                  value={disruptionDraft.targetWarehouseId} 
-                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} 
-                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
-                >
-                  <option value="">Auto-select</option>
-                  {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
-                <input 
-                  disabled={!canRunDisruptions}
-                  type="number" 
-                  value={disruptionDraft.severity} 
-                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} 
-                  placeholder="60" 
-                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('late_pickup')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                📦 Late Pickup
-              </button>
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('warehouse_congestion')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                🏭 Warehouse Congestion
-              </button>
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('inaccurate_eta')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                ⏱️ Inaccurate ETA
-              </button>
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('cascading_reroute')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                🔄 Cascading Reroute
-              </button>
-            </div>
+            {/* ── Late Pickup fields ── */}
+            {disruptionDraft.type === 'late_pickup' && (
+              <>
+                <div className="text-[11px] text-muted bg-bg border border-border rounded-xl p-2">
+                  📦 Simulates a carrier failing to collect a shipment on time, increasing its risk and delaying ETA.
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Target Shipment</label>
+                    <select disabled={!canRunDisruptions} value={disruptionDraft.targetShipmentId} onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text">
+                      <option value="">All shipments</option>
+                      {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Pickup Delay (minutes)</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.delayMinutes || 90} onChange={(e) => setDisruptionDraft((p) => ({ ...p, delayMinutes: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.severity} onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[10px] text-muted mb-1 block">Reason</label>
+                  <input disabled={!canRunDisruptions} value={disruptionDraft.reason || ''} onChange={(e) => setDisruptionDraft((p) => ({ ...p, reason: e.target.value }))} placeholder="e.g., Vehicle breakdown at depot" className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                </div>
+              </>
+            )}
+
+            {/* ── Warehouse Congestion fields ── */}
+            {disruptionDraft.type === 'warehouse_congestion' && (
+              <>
+                <div className="text-[11px] text-muted bg-bg border border-border rounded-xl p-2">
+                  🏭 Simulates a hub becoming congested, raising risk for all shipments passing through it.
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Congested Warehouse</label>
+                    <select disabled={!canRunDisruptions} value={disruptionDraft.targetWarehouseId} onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text">
+                      <option value="">Auto-select</option>
+                      {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Congestion % Capacity</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.congestionPercent || 80} onChange={(e) => setDisruptionDraft((p) => ({ ...p, congestionPercent: e.target.value }))} placeholder="80" className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.severity} onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── Inaccurate ETA fields ── */}
+            {disruptionDraft.type === 'inaccurate_eta' && (
+              <>
+                <div className="text-[11px] text-muted bg-bg border border-border rounded-xl p-2">
+                  ⏱️ Simulates ETA predictions drifting from reality, causing late or unexpectedly early arrivals.
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Target Shipment</label>
+                    <select disabled={!canRunDisruptions} value={disruptionDraft.targetShipmentId} onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text">
+                      <option value="">All shipments</option>
+                      {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">ETA Drift (minutes)</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.driftMinutes || 120} onChange={(e) => setDisruptionDraft((p) => ({ ...p, driftMinutes: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Drift Direction</label>
+                    <select disabled={!canRunDisruptions} value={disruptionDraft.driftDirection || 'later'} onChange={(e) => setDisruptionDraft((p) => ({ ...p, driftDirection: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text">
+                      <option value="later">Later than predicted</option>
+                      <option value="earlier">Earlier than predicted</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.severity} onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── Cascading Reroute fields ── */}
+            {disruptionDraft.type === 'cascading_reroute' && (
+              <>
+                <div className="text-[11px] text-muted bg-bg border border-border rounded-xl p-2">
+                  🔄 Simulates a primary shipment blockage that cascades to multiple other shipments in the network.
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Primary Shipment (trigger)</label>
+                    <select disabled={!canRunDisruptions} value={disruptionDraft.targetShipmentId} onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text">
+                      <option value="">Auto-select</option>
+                      {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Blocked At Warehouse</label>
+                    <select disabled={!canRunDisruptions} value={disruptionDraft.targetWarehouseId} onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text">
+                      <option value="">Auto-select</option>
+                      {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block"># Shipments Affected (cascade)</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.affectedCount || 3} onChange={(e) => setDisruptionDraft((p) => ({ ...p, affectedCount: e.target.value }))} min="1" max={scenario.shipments.length} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
+                    <input disabled={!canRunDisruptions} type="number" value={disruptionDraft.severity} onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text" />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Fire button */}
+            <button
+              disabled={!canRunDisruptions}
+              onClick={() => triggerDisruption(disruptionDraft.type)}
+              className="w-full bg-red/10 border border-red/30 rounded-xl text-xs py-3 disabled:opacity-40 hover:bg-red/20 font-semibold text-red flex items-center justify-center gap-2 transition-all"
+            >
+              <AlertTriangle className="w-4 h-4" />
+              Generate {disruptionDraft.type.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} Disruption
+            </button>
           </div>
 
           {pipeline && (
