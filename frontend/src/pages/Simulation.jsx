@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Polyline, Popup, useMapEvents } from 'react-leaflet';
 import { AlertTriangle, Network, Save, Plus, Factory, Truck, Route, Sparkles, RotateCcw, ChevronRight, CheckCircle2, Wand2 } from 'lucide-react';
-import { generateDisruption, saveSimulationScenario, generateSampleSystem, resetState } from '../services/api';
+import { generateDisruption, saveSimulationScenario, generateSampleSystem, resetState, getSimulationScenario } from '../services/api';
 
 function MapClickCapture({ onClick }) {
   useMapEvents({
@@ -23,6 +23,27 @@ export default function Simulation() {
   const [shipmentDraft, setShipmentDraft] = useState({ routeId: '', carrierId: '', progress: 10, risk: 20, status: 'ON TRACK', slaMinutes: 420, etaMinutes: 220, notes: '' });
   const [disruptionDraft, setDisruptionDraft] = useState({ type: 'late_pickup', targetShipmentId: '', targetWarehouseId: '', severity: 60 });
   const [generating, setGenerating] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch saved scenario from backend on mount so data survives navigation
+  useEffect(() => {
+    let cancelled = false;
+    getSimulationScenario().then((data) => {
+      if (cancelled) return;
+      if (data && (data.warehouses?.length || data.routes?.length || data.carriers?.length || data.shipments?.length)) {
+        setScenario(data);
+        setScenarioSaved(true);
+        // Pre-fill disruption targets so user can run disruptions immediately
+        if (data.shipments?.length) {
+          setDisruptionDraft((prev) => ({ ...prev, targetShipmentId: data.shipments[0].id }));
+        }
+        if (data.warehouses?.length) {
+          setDisruptionDraft((prev) => ({ ...prev, targetWarehouseId: data.warehouses[0].id }));
+        }
+      }
+    }).catch(() => {}).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   const warehousesById = useMemo(() => {
     const map = new Map();
@@ -212,6 +233,10 @@ export default function Simulation() {
       const res = await generateDisruption(payload);
       setLastMessage(res.data?.message || 'Disruption generated.');
       setPipeline(res.data?.pipeline || null);
+      // Refresh scenario so the map reflects disruption changes
+      if (res.data?.scenario) {
+        setScenario(res.data.scenario);
+      }
     } catch {
       setLastMessage('Failed to generate disruption.');
     }
@@ -219,6 +244,7 @@ export default function Simulation() {
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 px-6 pb-6 overflow-y-auto h-full">
+      <div className="space-y-5">
       <div className="bg-surface border border-border rounded-2xl overflow-hidden shadow-card">
         <div className="flex items-center gap-2 p-4 border-b border-border">
           <Network className="w-4 h-4 text-amber" />
@@ -312,6 +338,101 @@ export default function Simulation() {
           </span>
           <span className="text-xs text-muted">{lastMessage}</span>
         </div>
+      </div>
+
+      {/* Disruptions — below the map */}
+      <div className="bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-card">
+          <div className="flex items-center gap-2">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canRunDisruptions ? 'bg-red/10 border border-red/40 text-red' : 'bg-bg border border-border text-muted'}`}>5</div>
+            <AlertTriangle className={`w-4 h-4 ${canRunDisruptions ? 'text-red' : 'text-muted'}`} />
+            <h3 className={`text-sm font-semibold ${canRunDisruptions ? 'text-text' : 'text-muted'}`}>Generate Disruptions</h3>
+          </div>
+          {!canRunDisruptions && (
+            <div className="text-[11px] text-red bg-red/5 border border-red/20 rounded-xl p-2">
+              ⚠️ Complete all steps and save the scenario first to unlock disruption generation.
+            </div>
+          )}
+          
+          <div className="space-y-2">
+            <div className="grid grid-cols-3 gap-2">
+              <div>
+                <label className="text-[10px] text-muted mb-1 block">Target Shipment (optional)</label>
+                <select 
+                  disabled={!canRunDisruptions}
+                  value={disruptionDraft.targetShipmentId} 
+                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} 
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
+                >
+                  <option value="">Auto-select highest risk</option>
+                  {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-muted mb-1 block">Target Warehouse (optional)</label>
+                <select 
+                  disabled={!canRunDisruptions}
+                  value={disruptionDraft.targetWarehouseId} 
+                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} 
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
+                >
+                  <option value="">Auto-select</option>
+                  {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
+                <input 
+                  disabled={!canRunDisruptions}
+                  type="number" 
+                  value={disruptionDraft.severity} 
+                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} 
+                  placeholder="60" 
+                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('late_pickup')} 
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
+              >
+                📦 Late Pickup
+              </button>
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('warehouse_congestion')} 
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
+              >
+                🏭 Warehouse Congestion
+              </button>
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('inaccurate_eta')} 
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
+              >
+                ⏱️ Inaccurate ETA
+              </button>
+              <button 
+                disabled={!canRunDisruptions} 
+                onClick={() => triggerDisruption('cascading_reroute')} 
+                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
+              >
+                🔄 Cascading Reroute
+              </button>
+            </div>
+          </div>
+
+          {pipeline && (
+            <div className="border border-border rounded-xl p-3 bg-bg space-y-2">
+              <div className="flex items-center gap-1 text-xs text-amber"><Sparkles className="w-3 h-3" />Pipeline executed immediately</div>
+              <div className="text-[11px] text-text/70">Observer: {(pipeline.observer?.observations || []).length} observation groups</div>
+              <div className="text-[11px] text-text/70">Reasoner: {(pipeline.reasoner?.hypotheses || []).length} hypotheses</div>
+              <div className="text-[11px] text-text/70">Decider: {(pipeline.decider?.actions || []).length} actions</div>
+              <div className="text-[11px] text-text/70">Queued approvals: {pipeline.queuedApprovals}</div>
+            </div>
+          )}
+      </div>
       </div>
 
       <div className="space-y-5">
@@ -669,99 +790,6 @@ export default function Simulation() {
           </div>
         </div>
 
-        {/* Step 5 & 6: Disruptions */}
-        <div className="bg-surface border border-border rounded-2xl p-5 space-y-4 shadow-card">
-          <div className="flex items-center gap-2">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${canRunDisruptions ? 'bg-red/10 border border-red/40 text-red' : 'bg-bg border border-border text-muted'}`}>5</div>
-            <AlertTriangle className={`w-4 h-4 ${canRunDisruptions ? 'text-red' : 'text-muted'}`} />
-            <h3 className={`text-sm font-semibold ${canRunDisruptions ? 'text-text' : 'text-muted'}`}>Generate Disruptions</h3>
-          </div>
-          {!canRunDisruptions && (
-            <div className="text-[11px] text-red bg-red/5 border border-red/20 rounded-xl p-2">
-              ⚠️ Complete all steps above and save the scenario first to unlock disruption generation.
-            </div>
-          )}
-          
-          <div className="space-y-2">
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <label className="text-[10px] text-muted mb-1 block">Target Shipment (optional)</label>
-                <select 
-                  disabled={!canRunDisruptions}
-                  value={disruptionDraft.targetShipmentId} 
-                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetShipmentId: e.target.value }))} 
-                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
-                >
-                  <option value="">Auto-select highest risk</option>
-                  {scenario.shipments.map((s) => <option key={s.id} value={s.id}>{s.id}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] text-muted mb-1 block">Target Warehouse (optional)</label>
-                <select 
-                  disabled={!canRunDisruptions}
-                  value={disruptionDraft.targetWarehouseId} 
-                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, targetWarehouseId: e.target.value }))} 
-                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
-                >
-                  <option value="">Auto-select</option>
-                  {scenario.warehouses.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-[10px] text-muted mb-1 block">Severity (1-100)</label>
-                <input 
-                  disabled={!canRunDisruptions}
-                  type="number" 
-                  value={disruptionDraft.severity} 
-                  onChange={(e) => setDisruptionDraft((p) => ({ ...p, severity: e.target.value }))} 
-                  placeholder="60" 
-                  className="w-full bg-bg border border-border rounded-xl px-3 py-2 text-xs disabled:opacity-40 text-text"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('late_pickup')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                📦 Late Pickup
-              </button>
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('warehouse_congestion')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                🏭 Warehouse Congestion
-              </button>
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('inaccurate_eta')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                ⏱️ Inaccurate ETA
-              </button>
-              <button 
-                disabled={!canRunDisruptions} 
-                onClick={() => triggerDisruption('cascading_reroute')} 
-                className="bg-red/5 border border-red/20 rounded-xl text-xs py-2.5 disabled:opacity-40 hover:bg-red/10 font-semibold text-red"
-              >
-                🔄 Cascading Reroute
-              </button>
-            </div>
-          </div>
-
-          {pipeline && (
-            <div className="border border-border rounded-xl p-3 bg-bg space-y-2">
-              <div className="flex items-center gap-1 text-xs text-amber"><Sparkles className="w-3 h-3" />Pipeline executed immediately</div>
-              <div className="text-[11px] text-text/70">Observer: {(pipeline.observer?.observations || []).length} observation groups</div>
-              <div className="text-[11px] text-text/70">Reasoner: {(pipeline.reasoner?.hypotheses || []).length} hypotheses</div>
-              <div className="text-[11px] text-text/70">Decider: {(pipeline.decider?.actions || []).length} actions</div>
-              <div className="text-[11px] text-text/70">Queued approvals: {pipeline.queuedApprovals}</div>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );

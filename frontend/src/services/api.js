@@ -20,13 +20,13 @@ const mockEvents = [
 ];
 
 const mockMetrics = {
-  shipments: { value: 1284, change: '+12%' },
-  atRisk: { value: 23, change: '+3' },
-  delayed: { value: 8, change: '-2' },
-  agentOps: { value: 14520, change: '+847' },
-  approvals: { value: 3, change: '+1' },
-  ollamaStatus: 'connected',
-  agentsActive: 5,
+  shipments: { value: 0, change: '—' },
+  atRisk: { value: 0, change: '—' },
+  delayed: { value: 0, change: '—' },
+  agentOps: { value: 0, change: '—' },
+  approvals: { value: 0, change: '—' },
+  ollamaStatus: 'disconnected',
+  agentsActive: 0,
   agentsTotal: 5,
 };
 

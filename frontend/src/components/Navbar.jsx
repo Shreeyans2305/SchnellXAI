@@ -88,10 +88,8 @@ export default function Navbar() {
             </div>
             <div className="flex items-end gap-2">
               <span className="text-3xl font-bold text-text">{c.value}</span>
-              <span className={`text-xs font-medium mb-1 ${
-                c.change?.toString().startsWith('+') ? 'text-green' : 'text-red'
-              }`}>
-                {c.change} last day
+              <span className="text-xs font-medium mb-1 text-muted">
+                {c.change}
               </span>
             </div>
           </div>

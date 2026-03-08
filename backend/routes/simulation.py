@@ -159,6 +159,7 @@ async def generate_disruption(body: dict):
 
     return {
         "message": f"Disruption '{body.get('type')}' applied and pipeline executed.",
+        "scenario": _saved_scenario,
         "pipeline": {
             "observer": {"observations": result.get("observations", [])},
             "reasoner": {"hypotheses": result.get("hypotheses", [])},
